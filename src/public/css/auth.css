@@ -1,0 +1,67 @@
+/* ================================
+   ModoFit - Estilos de Autenticación
+   ================================ */
+
+.auth-body {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 100vh;
+}
+
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.auth-container .card {
+    border-radius: 20px;
+    overflow: hidden;
+    max-width: 500px;
+    width: 100%;
+}
+
+.auth-container .card-body {
+    padding: 40px;
+}
+
+.auth-container .form-control {
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 1rem;
+}
+
+.auth-container .input-group-text {
+    border-radius: 10px 0 0 10px;
+    padding: 14px 16px;
+}
+
+.auth-container .btn-lg {
+    padding: 14px 30px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+}
+
+.auth-container a {
+    color: #0d6efd;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.auth-container a:hover {
+    color: #0b5ed7;
+}
+
+/* Password toggle button */
+#togglePassword {
+    cursor: pointer;
+    border-radius: 0 10px 10px 0;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .auth-container .card-body {
+        padding: 30px 20px;
+    }
+}

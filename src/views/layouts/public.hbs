@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ModoFit - Tu gimnasio de confianza">
+    <meta name="author" content="ModoFit">
+    <title>{{title}}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/css/styles.css" rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="icon" href="/img/logo.ico" type="image/x-icon">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="/img/logo.webp" alt="ModoFit" height="40" class="d-inline-block align-text-top">
+                <span class="ms-2 fw-bold">ModoFit</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/servicios">Servicios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pedidos">Comprar</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/nosotros">Nosotros</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contacto">Contacto</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    {{#if user}}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> {{user.nomcli}}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/dashboard"><i class="bi bi-speedometer2"></i> Mi Dashboard</a></li>
+                            <li><a class="dropdown-item" href="/dashboard/perfil"><i class="bi bi-person"></i> Mi Perfil</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/auth/logout"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a></li>
+                        </ul>
+                    </li>
+                    {{else}}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/auth/login"><i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary ms-2" href="/auth/registro">Registrarse</a>
+                    </li>
+                    {{/if}}
+                    <li class="nav-item ms-2">
+                        <a class="btn btn-outline-light position-relative" href="/pedidos/carrito">
+                            <i class="bi bi-cart3"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count" style="display: none;">0</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main style="margin-top: 76px;">
+        {{{body}}}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5 class="fw-bold mb-3">
+                        <img src="/img/logo.webp" alt="ModoFit" height="30"> ModoFit
+                    </h5>
+                    <p class="text-muted">Tu gimnasio de confianza. Transforma tu cuerpo, transforma tu vida.</p>
+                    <div class="social-links">
+                        <a href="#" class="text-light me-3"><i class="bi bi-facebook fs-4"></i></a>
+                        <a href="#" class="text-light me-3"><i class="bi bi-instagram fs-4"></i></a>
+                        <a href="#" class="text-light me-3"><i class="bi bi-tiktok fs-4"></i></a>
+                        <a href="#" class="text-light"><i class="bi bi-whatsapp fs-4"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h6 class="fw-bold mb-3">Enlaces</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="/" class="text-muted text-decoration-none">Inicio</a></li>
+                        <li class="mb-2"><a href="/servicios" class="text-muted text-decoration-none">Servicios</a></li>
+                        <li class="mb-2"><a href="/pedidos" class="text-muted text-decoration-none">Comprar</a></li>
+                        <li class="mb-2"><a href="/contacto" class="text-muted text-decoration-none">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h6 class="fw-bold mb-3">Horarios</h6>
+                    <ul class="list-unstyled text-muted">
+                        <li class="mb-2"><i class="bi bi-clock"></i> Lun - Vie: 5:00 AM - 11:00 PM</li>
+                        <li class="mb-2"><i class="bi bi-clock"></i> Sábados: 6:00 AM - 8:00 PM</li>
+                        <li class="mb-2"><i class="bi bi-clock"></i> Domingos: 7:00 AM - 2:00 PM</li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h6 class="fw-bold mb-3">Contacto</h6>
+                    <ul class="list-unstyled text-muted">
+                        <li class="mb-2"><i class="bi bi-geo-alt"></i> Av. Principal 123, Lima</li>
+                        <li class="mb-2"><i class="bi bi-telephone"></i> +51 963 061 209</li>
+                        <li class="mb-2"><i class="bi bi-envelope"></i> info@modofit.pe</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="text-muted mb-0">&copy; 2025 ModoFit. Todos los derechos reservados.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="text-muted text-decoration-none me-3">Términos de uso</a>
+                    <a href="#" class="text-muted text-decoration-none">Política de privacidad</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Custom JS -->
+    <script src="/js/main.js"></script>
+</body>
+</html>

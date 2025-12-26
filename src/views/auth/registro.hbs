@@ -1,0 +1,87 @@
+<div class="row justify-content-center align-items-center min-vh-100 py-5">
+    <div class="col-md-8 col-lg-6 col-xl-5">
+        <div class="card border-0 shadow-lg">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <a href="/">
+                        <img src="/img/logo.webp" alt="ModoFit" height="60" class="mb-3">
+                    </a>
+                    <h4 class="fw-bold">Crear Cuenta</h4>
+                    <p class="text-muted">Únete a la familia ModoFit</p>
+                </div>
+
+                {{#if message}}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{message}}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {{/if}}
+
+                <form action="/auth/registro" method="POST" id="registroForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="nombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Tu nombre" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="apellido" class="form-label">Apellido</label>
+                            <input type="text" class="form-control" id="apellido" name="apellido" placeholder="Tu apellido" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Correo electrónico</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="ejemplo@correo.com" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="telefono" class="form-label">Teléfono</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                            <input type="tel" class="form-control" id="telefono" name="telefono" placeholder="999 999 999" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Mínimo 6 caracteres" minlength="6" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirmar contraseña</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Repite tu contraseña" required>
+                        </div>
+                    </div>
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="terminos" name="terminos" required>
+                        <label class="form-check-label" for="terminos">
+                            Acepto los <a href="#" class="text-decoration-none">términos y condiciones</a> y la <a href="#" class="text-decoration-none">política de privacidad</a>
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                        <i class="bi bi-person-plus me-2"></i>Crear Cuenta
+                    </button>
+                </form>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted mb-0">¿Ya tienes cuenta? <a href="/auth/login" class="text-decoration-none fw-bold">Inicia sesión</a></p>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="text-center">
+                    <a href="/" class="text-muted text-decoration-none">
+                        <i class="bi bi-arrow-left me-1"></i>Volver al inicio
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

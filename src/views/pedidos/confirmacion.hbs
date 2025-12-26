@@ -1,0 +1,59 @@
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card border-0 shadow-sm text-center">
+                    <div class="card-body py-5">
+                        <div class="mb-4">
+                            <div class="bg-success text-light rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                                <i class="bi bi-check-lg fs-1"></i>
+                            </div>
+                        </div>
+                        <h2 class="fw-bold text-success mb-3">¡Pedido Confirmado!</h2>
+                        <p class="lead text-muted mb-4">
+                            Gracias por tu compra. Tu pedido ha sido registrado exitosamente.
+                        </p>
+                        
+                        {{#if pedido}}
+                        <div class="bg-light rounded p-4 mb-4">
+                            <h5 class="mb-3">Detalles del Pedido</h5>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>N° de Pedido:</span>
+                                <strong>#{{pedido.idped}}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Fecha:</span>
+                                <strong>{{formatDate pedido.fecped}}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Total:</span>
+                                <strong class="text-primary">{{formatCurrency pedido.totped}}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Método de Pago:</span>
+                                <strong>{{pedido.metpagped}}</strong>
+                            </div>
+                        </div>
+                        {{/if}}
+                        
+                        <p class="text-muted mb-4">
+                            <i class="bi bi-envelope me-2"></i>
+                            Te hemos enviado los detalles a tu correo electrónico.
+                        </p>
+                        
+                        <div class="d-flex gap-3 justify-content-center">
+                            <a href="/" class="btn btn-primary">
+                                <i class="bi bi-house me-2"></i>Volver al Inicio
+                            </a>
+                            {{#if user}}
+                            <a href="/dashboard" class="btn btn-outline-primary">
+                                <i class="bi bi-speedometer2 me-2"></i>Mi Dashboard
+                            </a>
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

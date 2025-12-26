@@ -1,0 +1,184 @@
+<section class="py-5 bg-dark text-light">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="display-5 fw-bold">Tienda ModoFit</h1>
+            <p class="lead">Elige tu membresía o productos</p>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <!-- Tabs -->
+        <ul class="nav nav-pills nav-fill mb-4" id="shopTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="membresias-tab" data-bs-toggle="pill" data-bs-target="#membresias" type="button">
+                    <i class="bi bi-card-checklist me-2"></i>Membresías
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="productos-tab" data-bs-toggle="pill" data-bs-target="#productos" type="button">
+                    <i class="bi bi-box me-2"></i>Productos
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="shopTabsContent">
+            <!-- Membresías Tab -->
+            <div class="tab-pane fade show active" id="membresias" role="tabpanel">
+                <div class="row g-4">
+                    {{#if tiposMembresia.length}}
+                        {{#each tiposMembresia}}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body text-center p-4">
+                                    <h5 class="card-title fw-bold">{{this.nomtm}}</h5>
+                                    <h3 class="text-primary fw-bold">{{formatCurrency this.pretm}}</h3>
+                                    <p class="text-muted">{{this.destm}}</p>
+                                    <p class="small text-muted">Duración: {{this.duratm}} días</p>
+                                    <button class="btn btn-primary w-100" onclick="agregarAlCarrito('membresia', {{this.idtm}}, '{{this.nomtm}}', {{this.pretm}})">
+                                        <i class="bi bi-cart-plus me-2"></i>Agregar al Carrito
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {{/each}}
+                    {{else}}
+                    <!-- Membresías de ejemplo -->
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <h5 class="card-title fw-bold">Plan Básico</h5>
+                                <h3 class="text-primary fw-bold">S/ 99.00</h3>
+                                <p class="text-muted">Acceso a máquinas y vestidores</p>
+                                <p class="small text-muted">Duración: 30 días</p>
+                                <button class="btn btn-primary w-100" onclick="agregarAlCarrito('membresia', 1, 'Plan Básico', 99)">
+                                    <i class="bi bi-cart-plus me-2"></i>Agregar al Carrito
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border-0 shadow-sm border-primary">
+                            <div class="card-header bg-primary text-light text-center">
+                                <span class="badge bg-warning text-dark">MÁS POPULAR</span>
+                            </div>
+                            <div class="card-body text-center p-4">
+                                <h5 class="card-title fw-bold">Plan Premium</h5>
+                                <h3 class="text-primary fw-bold">S/ 149.00</h3>
+                                <p class="text-muted">Todo del básico + clases grupales</p>
+                                <p class="small text-muted">Duración: 30 días</p>
+                                <button class="btn btn-primary w-100" onclick="agregarAlCarrito('membresia', 2, 'Plan Premium', 149)">
+                                    <i class="bi bi-cart-plus me-2"></i>Agregar al Carrito
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <h5 class="card-title fw-bold">Plan VIP</h5>
+                                <h3 class="text-primary fw-bold">S/ 249.00</h3>
+                                <p class="text-muted">Todo incluido + entrenador personal</p>
+                                <p class="small text-muted">Duración: 30 días</p>
+                                <button class="btn btn-primary w-100" onclick="agregarAlCarrito('membresia', 3, 'Plan VIP', 249)">
+                                    <i class="bi bi-cart-plus me-2"></i>Agregar al Carrito
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {{/if}}
+                </div>
+            </div>
+
+            <!-- Productos Tab -->
+            <div class="tab-pane fade" id="productos" role="tabpanel">
+                <div class="row g-4">
+                    {{#if productos.length}}
+                        {{#each productos}}
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <img src="/img/productos/{{this.imgpro}}" class="card-img-top" alt="{{this.nompro}}" onerror="this.src='/img/no-image.png'">
+                                <div class="card-body">
+                                    <h6 class="card-title fw-bold">{{this.nompro}}</h6>
+                                    <p class="text-primary fw-bold mb-2">{{formatCurrency this.prepro}}</p>
+                                    <button class="btn btn-outline-primary btn-sm w-100" onclick="agregarAlCarrito('producto', {{this.idpro}}, '{{this.nompro}}', {{this.prepro}})">
+                                        <i class="bi bi-cart-plus"></i> Agregar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {{/each}}
+                    {{else}}
+                    <div class="col-12 text-center py-5">
+                        <i class="bi bi-box-seam fs-1 text-muted"></i>
+                        <p class="mt-3 text-muted">No hay productos disponibles por el momento</p>
+                    </div>
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Floating Cart Button -->
+<div class="position-fixed bottom-0 end-0 p-4" style="z-index: 1050;">
+    <a href="/pedidos/carrito" class="btn btn-primary btn-lg rounded-pill shadow-lg">
+        <i class="bi bi-cart3 me-2"></i>
+        <span class="cart-total">S/ 0.00</span>
+        <span class="badge bg-light text-primary ms-2 cart-items">0</span>
+    </a>
+</div>
+
+<script>
+// Carrito en localStorage
+let carrito = JSON.parse(localStorage.getItem('modofit_carrito')) || [];
+
+function agregarAlCarrito(tipo, id, nombre, precio) {
+    const item = carrito.find(i => i.id === id && i.tipo === tipo);
+    
+    if (item) {
+        item.cantidad++;
+    } else {
+        carrito.push({
+            tipo,
+            id,
+            nombre,
+            precio,
+            cantidad: 1
+        });
+    }
+    
+    localStorage.setItem('modofit_carrito', JSON.stringify(carrito));
+    actualizarCarritoUI();
+    
+    Swal.fire({
+        icon: 'success',
+        title: '¡Agregado!',
+        text: nombre + ' se agregó al carrito',
+        showConfirmButton: false,
+        timer: 1500,
+        position: 'top-end',
+        toast: true
+    });
+}
+
+function actualizarCarritoUI() {
+    const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+    const items = carrito.reduce((sum, item) => sum + item.cantidad, 0);
+    
+    document.querySelectorAll('.cart-total').forEach(el => {
+        el.textContent = 'S/ ' + total.toFixed(2);
+    });
+    document.querySelectorAll('.cart-items').forEach(el => {
+        el.textContent = items;
+    });
+    document.querySelectorAll('.cart-count').forEach(el => {
+        el.textContent = items;
+        el.style.display = items > 0 ? 'inline' : 'none';
+    });
+}
+
+// Actualizar UI al cargar
+document.addEventListener('DOMContentLoaded', actualizarCarritoUI);
+</script>

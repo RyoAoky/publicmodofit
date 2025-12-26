@@ -1,0 +1,125 @@
+/* ================================
+   ModoFit - Estilos del Dashboard
+   ================================ */
+
+#wrapper {
+    overflow-x: hidden;
+}
+
+#sidebar-wrapper {
+    min-height: 100vh;
+    width: 250px;
+    margin-left: -250px;
+    transition: margin 0.25s ease-out;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 100;
+}
+
+#sidebar-wrapper .sidebar-heading {
+    font-size: 1.1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+#sidebar-wrapper .list-group-item {
+    padding: 15px 20px;
+    transition: all 0.3s ease;
+    border-radius: 0;
+}
+
+#sidebar-wrapper .list-group-item:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    padding-left: 25px;
+}
+
+#sidebar-wrapper .list-group-item.active {
+    background-color: #0d6efd !important;
+}
+
+#sidebar-wrapper .list-group-item i {
+    width: 20px;
+}
+
+#page-content-wrapper {
+    width: 100%;
+    min-height: 100vh;
+    transition: margin 0.25s ease-out;
+    margin-left: 250px;
+}
+
+/* Toggled state */
+#wrapper.toggled #sidebar-wrapper {
+    margin-left: 0;
+}
+
+#wrapper.toggled #page-content-wrapper {
+    margin-left: 0;
+}
+
+/* Default state: sidebar visible */
+#wrapper #sidebar-wrapper {
+    margin-left: 0;
+}
+
+/* Menu toggle button */
+#menu-toggle {
+    border-radius: 8px;
+}
+
+/* Stats cards */
+.card .opacity-50 {
+    opacity: 0.5;
+}
+
+.card .opacity-75 {
+    opacity: 0.75;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #sidebar-wrapper {
+        margin-left: -250px;
+    }
+    
+    #page-content-wrapper {
+        margin-left: 0;
+    }
+    
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: 0;
+    }
+    
+    #wrapper.toggled #page-content-wrapper {
+        margin-left: 250px;
+    }
+}
+
+/* Tables in dashboard */
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Quick action buttons */
+.btn-outline-primary:hover,
+.btn-outline-secondary:hover,
+.btn-outline-success:hover,
+.btn-outline-info:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Profile card */
+.card.border-danger {
+    border: 1px solid #dc3545 !important;
+}
+
+/* Sticky sidebar on scroll */
+.sticky-top {
+    top: 100px !important;
+}
+
+/* User dropdown */
+.nav-item.dropdown .dropdown-menu {
+    min-width: 200px;
+}

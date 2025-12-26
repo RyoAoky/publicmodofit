@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar carrito desde localStorage
     initCarrito();
     
+    // Inicializar estado del usuario
+    initUserState();
+    
     // Navbar scroll effect
     initNavbarScroll();
     
@@ -15,6 +18,36 @@ document.addEventListener('DOMContentLoaded', function() {
     // Formulario de contacto
     initContactForm();
 });
+
+/**
+ * Inicializar estado del usuario en el navbar
+ */
+async function initUserState() {
+    try {
+        const response = await fetch('/auth/api/me');
+        const data = await response.json();
+        
+        const userMenu = document.getElementById('user-menu');
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
+        const userName = document.getElementById('user-name');
+        
+        if (data.success && data.user) {
+            // Usuario logueado
+            if (userMenu) userMenu.style.display = 'block';
+            if (loginBtn) loginBtn.style.display = 'none';
+            if (registerBtn) registerBtn.style.display = 'none';
+            if (userName) userName.textContent = data.user.nomcli;
+        } else {
+            // Usuario no logueado
+            if (userMenu) userMenu.style.display = 'none';
+            if (loginBtn) loginBtn.style.display = 'block';
+            if (registerBtn) registerBtn.style.display = 'block';
+        }
+    } catch (error) {
+        console.log('No se pudo verificar el estado del usuario');
+    }
+}
 
 /**
  * Inicializar contador del carrito

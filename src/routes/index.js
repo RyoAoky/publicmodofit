@@ -1,41 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const controllerrender = require('../controllers/controllerrender');
 
-// Página principal
-router.get('/', (req, res) => {
-    res.render('home/index', { 
-        layout: 'public',
-        title: 'ModoFit - Tu Gimnasio',
-        user: req.user || null
-    });
-});
-
-// Página de servicios
-router.get('/servicios', (req, res) => {
-    res.render('home/servicios', { 
-        layout: 'public',
-        title: 'Nuestros Servicios - ModoFit',
-        user: req.user || null
-    });
-});
-
-// Página de contacto
-router.get('/contacto', (req, res) => {
-    res.render('home/contacto', { 
-        layout: 'public',
-        title: 'Contacto - ModoFit',
-        user: req.user || null
-    });
-});
-
-// Página de nosotros
-router.get('/nosotros', (req, res) => {
-    res.render('home/nosotros', { 
-        layout: 'public',
-        title: 'Nosotros - ModoFit',
-        user: req.user || null
-    });
-});
+// Páginas públicas
+router.get('/', controllerrender.getHome);
+router.get('/servicios', controllerrender.getServicios);
+router.get('/nosotros', controllerrender.getNosotros);
+router.get('/contacto', controllerrender.getContacto);
 
 module.exports = router;
 

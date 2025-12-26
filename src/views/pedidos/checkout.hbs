@@ -10,27 +10,7 @@
                         <h5 class="mb-0 fw-bold"><i class="bi bi-person me-2"></i>Datos de Contacto</h5>
                     </div>
                     <div class="card-body">
-                        {{#if user}}
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Nombre</label>
-                                <input type="text" class="form-control" id="nombre" value="{{user.nomcli}}" readonly>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Apellido</label>
-                                <input type="text" class="form-control" id="apellido" value="{{user.apecli}}" readonly>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Correo electrónico</label>
-                                <input type="email" class="form-control" id="email" value="{{user.emailcli}}" readonly>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Teléfono</label>
-                                <input type="tel" class="form-control" id="telefono" value="{{user.celcli}}" readonly>
-                            </div>
-                        </div>
-                        {{else}}
-                        <div class="alert alert-info">
+                        <div id="alert-login" class="alert alert-info" style="display: none;">
                             <i class="bi bi-info-circle me-2"></i>
                             <a href="/auth/login">Inicia sesión</a> para una experiencia más rápida o completa tus datos:
                         </div>
@@ -52,82 +32,66 @@
                                 <input type="tel" class="form-control" id="telefono" required>
                             </div>
                         </div>
-                        {{/if}}
                     </div>
                 </div>
 
-                <!-- Método de pago -->
+                <!-- Método de pago - Solo Tarjeta -->
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-transparent border-0 py-3">
-                        <h5 class="mb-0 fw-bold"><i class="bi bi-wallet2 me-2"></i>Método de Pago</h5>
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-credit-card me-2"></i>Pago con Tarjeta</h5>
                     </div>
                     <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex gap-2 mb-3">
+                                <img src="https://img.icons8.com/color/48/visa.png" alt="Visa" height="32">
+                                <img src="https://img.icons8.com/color/48/mastercard.png" alt="Mastercard" height="32">
+                                <img src="https://img.icons8.com/color/48/amex.png" alt="Amex" height="32">
+                            </div>
+                        </div>
+                        
+                        <!-- Formulario de tarjeta OpenPay -->
                         <div class="row g-3">
-                            <div class="col-md-4">
-                                <div class="form-check card p-3 h-100">
-                                    <input class="form-check-input" type="radio" name="metodoPago" id="pago-efectivo" value="efectivo" checked>
-                                    <label class="form-check-label w-100 text-center" for="pago-efectivo">
-                                        <i class="bi bi-cash-coin fs-2 text-success d-block mb-2"></i>
-                                        <strong>Efectivo</strong>
-                                        <small class="text-muted d-block">Paga en el local</small>
-                                    </label>
-                                </div>
+                            <div class="col-12">
+                                <label class="form-label">Nombre en la tarjeta *</label>
+                                <input type="text" class="form-control" id="holderName" placeholder="Como aparece en la tarjeta" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Número de tarjeta *</label>
+                                <input type="text" class="form-control" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
                             </div>
                             <div class="col-md-4">
-                                <div class="form-check card p-3 h-100">
-                                    <input class="form-check-input" type="radio" name="metodoPago" id="pago-yape" value="yape">
-                                    <label class="form-check-label w-100 text-center" for="pago-yape">
-                                        <i class="bi bi-phone fs-2 text-primary d-block mb-2"></i>
-                                        <strong>Yape / Plin</strong>
-                                        <small class="text-muted d-block">Transferencia móvil</small>
-                                    </label>
-                                </div>
+                                <label class="form-label">Mes *</label>
+                                <select class="form-select" id="expirationMonth" required>
+                                    <option value="">Mes</option>
+                                    <option value="01">01</option>
+                                    <option value="02">02</option>
+                                    <option value="03">03</option>
+                                    <option value="04">04</option>
+                                    <option value="05">05</option>
+                                    <option value="06">06</option>
+                                    <option value="07">07</option>
+                                    <option value="08">08</option>
+                                    <option value="09">09</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                </select>
                             </div>
                             <div class="col-md-4">
-                                <div class="form-check card p-3 h-100">
-                                    <input class="form-check-input" type="radio" name="metodoPago" id="pago-tarjeta" value="tarjeta">
-                                    <label class="form-check-label w-100 text-center" for="pago-tarjeta">
-                                        <i class="bi bi-credit-card fs-2 text-info d-block mb-2"></i>
-                                        <strong>Tarjeta</strong>
-                                        <small class="text-muted d-block">Débito o crédito</small>
-                                    </label>
-                                </div>
+                                <label class="form-label">Año *</label>
+                                <select class="form-select" id="expirationYear" required>
+                                    <option value="">Año</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">CVV *</label>
+                                <input type="text" class="form-control" id="cvv" placeholder="123" maxlength="4" required>
                             </div>
                         </div>
 
-                        <!-- Datos de Yape -->
-                        <div id="datos-yape" class="mt-4" style="display: none;">
-                            <div class="alert alert-light border">
-                                <div class="row align-items-center">
-                                    <div class="col-md-6 text-center">
-                                        <img src="/img/qr-yape.png" alt="QR Yape" class="img-fluid" style="max-width: 200px;" onerror="this.style.display='none'">
-                                        <p class="mt-2 mb-0"><strong>Número Yape:</strong> 963 061 209</p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p class="mb-2">1. Realiza la transferencia al número indicado</p>
-                                        <p class="mb-2">2. Guarda el comprobante</p>
-                                        <p class="mb-0">3. Te confirmaremos por WhatsApp</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Datos de Tarjeta -->
-                        <div id="datos-tarjeta" class="mt-4" style="display: none;">
-                            <div class="row g-3">
-                                <div class="col-12">
-                                    <label class="form-label">Número de tarjeta</label>
-                                    <input type="text" class="form-control" id="numeroTarjeta" placeholder="1234 5678 9012 3456">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Fecha de vencimiento</label>
-                                    <input type="text" class="form-control" id="fechaTarjeta" placeholder="MM/AA">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">CVV</label>
-                                    <input type="text" class="form-control" id="cvvTarjeta" placeholder="123">
-                                </div>
-                            </div>
+                        <div class="alert alert-light mt-3">
+                            <i class="bi bi-shield-check me-2 text-success"></i>
+                            <small>Tu información de pago está protegida con encriptación SSL</small>
                         </div>
                     </div>
                 </div>
@@ -172,8 +136,58 @@
     </div>
 </section>
 
+<script src="https://js.openpay.pe/openpay.v1.min.js"></script>
+<script src="https://js.openpay.pe/openpay-data.v1.min.js"></script>
 <script>
+// Configuración OpenPay - Las credenciales se cargan dinámicamente
+let openpayMerchantId = '';
+let openpayPublicKey = '';
+let openpayDeviceSessionId = '';
+
 let carrito = JSON.parse(localStorage.getItem('modofit_carrito')) || [];
+
+// Inicializar OpenPay
+async function initOpenPay() {
+    try {
+        const response = await fetch('/pedidos/api/openpay-config');
+        const config = await response.json();
+        if (config.success) {
+            openpayMerchantId = config.merchantId;
+            openpayPublicKey = config.publicKey;
+            OpenPay.setId(openpayMerchantId);
+            OpenPay.setApiKey(openpayPublicKey);
+            OpenPay.setSandboxMode(config.sandbox);
+            openpayDeviceSessionId = OpenPay.deviceData.setup("payment-form", "deviceIdHiddenFieldName");
+        }
+    } catch (error) {
+        console.error('Error al inicializar OpenPay:', error);
+    }
+}
+
+// Llenar años de expiración
+function llenarAnios() {
+    const select = document.getElementById('expirationYear');
+    const currentYear = new Date().getFullYear();
+    for (let i = 0; i < 10; i++) {
+        const year = currentYear + i;
+        const option = document.createElement('option');
+        option.value = year.toString().slice(-2);
+        option.textContent = year;
+        select.appendChild(option);
+    }
+}
+
+// Formatear número de tarjeta
+document.getElementById('cardNumber').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+    e.target.value = value;
+});
+
+// Solo números en CVV
+document.getElementById('cvv').addEventListener('input', function(e) {
+    e.target.value = e.target.value.replace(/\D/g, '');
+});
 
 function renderResumen() {
     const container = document.getElementById('resumen-items');
@@ -198,71 +212,119 @@ function renderResumen() {
     document.getElementById('total').textContent = 'S/ ' + subtotal.toFixed(2);
 }
 
-// Mostrar/ocultar opciones de pago
-document.querySelectorAll('input[name="metodoPago"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-        document.getElementById('datos-yape').style.display = this.value === 'yape' ? 'block' : 'none';
-        document.getElementById('datos-tarjeta').style.display = this.value === 'tarjeta' ? 'block' : 'none';
-    });
-});
-
-async function procesarPago() {
-    const metodoPago = document.querySelector('input[name="metodoPago"]:checked').value;
-    const nombre = document.getElementById('nombre').value;
-    const apellido = document.getElementById('apellido').value;
-    const email = document.getElementById('email').value;
-    const telefono = document.getElementById('telefono').value;
+function validarFormulario() {
+    const nombre = document.getElementById('nombre').value.trim();
+    const apellido = document.getElementById('apellido').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const telefono = document.getElementById('telefono').value.trim();
+    const holderName = document.getElementById('holderName').value.trim();
+    const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+    const expirationMonth = document.getElementById('expirationMonth').value;
+    const expirationYear = document.getElementById('expirationYear').value;
+    const cvv = document.getElementById('cvv').value;
     
     if (!nombre || !apellido || !email || !telefono) {
-        Swal.fire('Error', 'Por favor completa todos los campos', 'error');
-        return;
+        Swal.fire('Error', 'Por favor completa todos los datos de contacto', 'error');
+        return false;
     }
+    
+    if (!holderName || !cardNumber || !expirationMonth || !expirationYear || !cvv) {
+        Swal.fire('Error', 'Por favor completa todos los datos de la tarjeta', 'error');
+        return false;
+    }
+    
+    if (cardNumber.length < 15 || cardNumber.length > 16) {
+        Swal.fire('Error', 'Número de tarjeta inválido', 'error');
+        return false;
+    }
+    
+    if (cvv.length < 3 || cvv.length > 4) {
+        Swal.fire('Error', 'CVV inválido', 'error');
+        return false;
+    }
+    
+    return true;
+}
+
+async function procesarPago() {
+    if (!validarFormulario()) return;
+    
+    const nombre = document.getElementById('nombre').value.trim();
+    const apellido = document.getElementById('apellido').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const telefono = document.getElementById('telefono').value.trim();
+    const holderName = document.getElementById('holderName').value.trim();
+    const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+    const expirationMonth = document.getElementById('expirationMonth').value;
+    const expirationYear = document.getElementById('expirationYear').value;
+    const cvv = document.getElementById('cvv').value;
     
     const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
     
     Swal.fire({
-        title: 'Procesando...',
-        text: 'Por favor espera',
+        title: 'Procesando pago...',
+        text: 'Por favor espera, no cierres esta ventana',
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading()
     });
     
-    try {
-        const response = await fetch('/pedidos/procesar-pago', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                items: carrito,
-                metodoPago,
-                datosCliente: { nombre, apellido, email, telefono },
-                total
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            localStorage.removeItem('modofit_carrito');
-            Swal.fire({
-                icon: 'success',
-                title: '¡Pedido Confirmado!',
-                text: 'Tu pedido #' + data.idPedido + ' ha sido registrado',
-                confirmButtonText: 'Ver Confirmación'
-            }).then(() => {
-                window.location.href = '/pedidos/confirmacion/' + data.idPedido;
+    // Crear token de tarjeta con OpenPay
+    OpenPay.token.create({
+        card_number: cardNumber,
+        holder_name: holderName,
+        expiration_year: expirationYear,
+        expiration_month: expirationMonth,
+        cvv2: cvv
+    }, async function(response) {
+        // Token creado exitosamente
+        try {
+            const pagoResponse = await fetch('/pedidos/api/procesar-pago', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    token_id: response.data.id,
+                    device_session_id: openpayDeviceSessionId,
+                    items: carrito,
+                    datosCliente: { nombre, apellido, email, telefono },
+                    total
+                })
             });
-        } else {
-            Swal.fire('Error', data.message, 'error');
+            
+            const data = await pagoResponse.json();
+            
+            if (data.success) {
+                localStorage.removeItem('modofit_carrito');
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Pago Exitoso!',
+                    text: 'Tu pedido ha sido procesado correctamente',
+                    confirmButtonText: 'Ver Confirmación'
+                }).then(() => {
+                    window.location.href = '/pedidos/confirmacion?id=' + data.data.idPedido;
+                });
+            } else {
+                Swal.fire('Error', data.message || 'No se pudo procesar el pago', 'error');
+            }
+        } catch (error) {
+            Swal.fire('Error', 'Hubo un problema al procesar tu pago', 'error');
         }
-    } catch (error) {
-        Swal.fire('Error', 'Hubo un problema al procesar tu pedido', 'error');
-    }
+    }, function(error) {
+        // Error al crear token
+        let mensaje = 'Error al procesar la tarjeta';
+        if (error.data && error.data.description) {
+            mensaje = error.data.description;
+        }
+        Swal.fire('Error', mensaje, 'error');
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     if (carrito.length === 0) {
         window.location.href = '/pedidos';
+        return;
     }
     renderResumen();
+    llenarAnios();
+    initOpenPay();
 });
 </script>

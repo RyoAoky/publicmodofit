@@ -8,13 +8,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0 opacity-75">Membresía Actual</h6>
-                        <h4 class="mb-0 fw-bold">
-                            {{#if membresia}}
-                            {{membresia.tipomem}}
-                            {{else}}
-                            Sin membresía
-                            {{/if}}
-                        </h4>
+                        <h4 class="mb-0 fw-bold" id="membresia-nombre">Cargando...</h4>
                     </div>
                     <i class="bi bi-card-checklist fs-1 opacity-50"></i>
                 </div>
@@ -27,13 +21,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0 opacity-75">Vencimiento</h6>
-                        <h4 class="mb-0 fw-bold">
-                            {{#if membresia}}
-                            {{formatDate membresia.fecfinmem}}
-                            {{else}}
-                            -
-                            {{/if}}
-                        </h4>
+                        <h4 class="mb-0 fw-bold" id="membresia-vencimiento">-</h4>
                     </div>
                     <i class="bi bi-calendar-check fs-1 opacity-50"></i>
                 </div>
@@ -46,7 +34,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0 opacity-75">Pedidos Totales</h6>
-                        <h4 class="mb-0 fw-bold">{{pedidos.length}}</h4>
+                        <h4 class="mb-0 fw-bold" id="pedidos-total">0</h4>
                     </div>
                     <i class="bi bi-bag fs-1 opacity-50"></i>
                 </div>
@@ -65,47 +53,12 @@
                     <a href="/dashboard/pedidos" class="text-decoration-none">Ver todos</a>
                 </div>
             </div>
-            <div class="card-body p-0">
-                {{#if pedidos.length}}
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>ID</th>
-                                <th>Fecha</th>
-                                <th>Total</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {{#each pedidos}}
-                            <tr>
-                                <td>#{{this.idped}}</td>
-                                <td>{{formatDate this.fecped}}</td>
-                                <td>{{formatCurrency this.totped}}</td>
-                                <td>
-                                    {{#ifCond this.estped '==' 'P'}}
-                                    <span class="badge bg-warning">Pendiente</span>
-                                    {{/ifCond}}
-                                    {{#ifCond this.estped '==' 'C'}}
-                                    <span class="badge bg-success">Completado</span>
-                                    {{/ifCond}}
-                                    {{#ifCond this.estped '==' 'X'}}
-                                    <span class="badge bg-danger">Cancelado</span>
-                                    {{/ifCond}}
-                                </td>
-                            </tr>
-                            {{/each}}
-                        </tbody>
-                    </table>
+            <div class="card-body p-0" id="pedidos-container">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
                 </div>
-                {{else}}
-                <div class="text-center py-5 text-muted">
-                    <i class="bi bi-bag-x fs-1"></i>
-                    <p class="mt-2">No tienes pedidos aún</p>
-                    <a href="/pedidos" class="btn btn-primary">Realizar primer pedido</a>
-                </div>
-                {{/if}}
             </div>
         </div>
     </div>
@@ -118,25 +71,12 @@
                     <h5 class="mb-0 fw-bold"><i class="bi bi-calendar-event me-2"></i>Próximas Reservas</h5>
                 </div>
             </div>
-            <div class="card-body">
-                {{#if reservas.length}}
-                <ul class="list-group list-group-flush">
-                    {{#each reservas}}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>{{this.nomres}}</strong>
-                            <br><small class="text-muted">{{formatDate this.fecres}}</small>
-                        </div>
-                        <span class="badge bg-primary">Confirmada</span>
-                    </li>
-                    {{/each}}
-                </ul>
-                {{else}}
-                <div class="text-center py-5 text-muted">
-                    <i class="bi bi-calendar-x fs-1"></i>
-                    <p class="mt-2">No tienes reservas activas</p>
+            <div class="card-body" id="reservas-container">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
                 </div>
-                {{/if}}
             </div>
         </div>
     </div>
@@ -180,3 +120,114 @@
         </div>
     </div>
 </div>
+
+<script>
+async function cargarDashboard() {
+    try {
+        const response = await fetch('/dashboard/api/data');
+        const data = await response.json();
+        
+        if (data.success) {
+            // Membresía
+            const membresia = data.data.membresia;
+            document.getElementById('membresia-nombre').textContent = membresia ? membresia.tipomem : 'Sin membresía';
+            document.getElementById('membresia-vencimiento').textContent = membresia ? formatearFecha(membresia.fecfinmem) : '-';
+            
+            // Pedidos
+            const pedidos = data.data.pedidos || [];
+            document.getElementById('pedidos-total').textContent = pedidos.length;
+            renderizarPedidos(pedidos);
+            
+            // Reservas
+            const reservas = data.data.reservas || [];
+            renderizarReservas(reservas);
+        }
+    } catch (error) {
+        console.error('Error al cargar dashboard:', error);
+    }
+}
+
+function renderizarPedidos(pedidos) {
+    const container = document.getElementById('pedidos-container');
+    
+    if (pedidos.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-bag-x fs-1"></i>
+                <p class="mt-2">No tienes pedidos aún</p>
+                <a href="/pedidos" class="btn btn-primary">Realizar primer pedido</a>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = `
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${pedidos.map(p => `
+                        <tr>
+                            <td>#${p.idped}</td>
+                            <td>${formatearFecha(p.fecped)}</td>
+                            <td>S/ ${parseFloat(p.totped).toFixed(2)}</td>
+                            <td>${getEstadoBadge(p.estped)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function renderizarReservas(reservas) {
+    const container = document.getElementById('reservas-container');
+    
+    if (reservas.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-calendar-x fs-1"></i>
+                <p class="mt-2">No tienes reservas activas</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = `
+        <ul class="list-group list-group-flush">
+            ${reservas.map(r => `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>${r.nomres}</strong>
+                        <br><small class="text-muted">${formatearFecha(r.fecres)}</small>
+                    </div>
+                    <span class="badge bg-primary">Confirmada</span>
+                </li>
+            `).join('')}
+        </ul>
+    `;
+}
+
+function getEstadoBadge(estado) {
+    switch(estado) {
+        case 'P': return '<span class="badge bg-warning">Pendiente</span>';
+        case 'C': return '<span class="badge bg-success">Completado</span>';
+        case 'X': return '<span class="badge bg-danger">Cancelado</span>';
+        default: return '<span class="badge bg-secondary">-</span>';
+    }
+}
+
+function formatearFecha(fecha) {
+    if (!fecha) return '-';
+    return new Date(fecha).toLocaleDateString('es-PE');
+}
+
+document.addEventListener('DOMContentLoaded', cargarDashboard);
+</script>

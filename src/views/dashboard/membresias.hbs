@@ -7,50 +7,79 @@
             <i class="bi bi-plus-circle me-1"></i>Nueva Membresía
         </a>
     </div>
-    <div class="card-body p-0">
-        {{#if membresias.length}}
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Tipo</th>
-                        <th>Fecha Inicio</th>
-                        <th>Fecha Fin</th>
-                        <th>Estado</th>
-                        <th>Precio</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each membresias}}
-                    <tr>
-                        <td><strong>{{this.tipomem}}</strong></td>
-                        <td>{{formatDate this.fecinimem}}</td>
-                        <td>{{formatDate this.fecfinmem}}</td>
-                        <td>
-                            {{#ifCond this.estmem '==' 'A'}}
-                            <span class="badge bg-success">Activa</span>
-                            {{/ifCond}}
-                            {{#ifCond this.estmem '==' 'V'}}
-                            <span class="badge bg-danger">Vencida</span>
-                            {{/ifCond}}
-                            {{#ifCond this.estmem '==' 'C'}}
-                            <span class="badge bg-secondary">Cancelada</span>
-                            {{/ifCond}}
-                        </td>
-                        <td>{{formatCurrency this.premem}}</td>
-                    </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-        </div>
-        {{else}}
+    <div class="card-body p-0" id="membresias-container">
         <div class="text-center py-5">
-            <i class="bi bi-card-list fs-1 text-muted"></i>
-            <p class="mt-3 text-muted">No tienes membresías registradas</p>
-            <a href="/pedidos" class="btn btn-primary">
-                <i class="bi bi-cart-plus me-2"></i>Comprar tu primera membresía
-            </a>
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
         </div>
-        {{/if}}
     </div>
 </div>
+
+<script>
+async function cargarMembresias() {
+    const container = document.getElementById('membresias-container');
+    try {
+        const response = await fetch('/dashboard/api/membresias');
+        const data = await response.json();
+        
+        if (data.success && data.data.length > 0) {
+            container.innerHTML = `
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Fecha Inicio</th>
+                                <th>Fecha Fin</th>
+                                <th>Estado</th>
+                                <th>Precio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.data.map(m => `
+                                <tr>
+                                    <td><strong>${m.tipomem}</strong></td>
+                                    <td>${formatearFecha(m.fecinimem)}</td>
+                                    <td>${formatearFecha(m.fecfinmem)}</td>
+                                    <td>${getEstadoMembresia(m.estmem)}</td>
+                                    <td>S/ ${parseFloat(m.premem).toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="bi bi-card-list fs-1 text-muted"></i>
+                    <p class="mt-3 text-muted">No tienes membresías registradas</p>
+                    <a href="/pedidos" class="btn btn-primary">
+                        <i class="bi bi-cart-plus me-2"></i>Comprar tu primera membresía
+                    </a>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error al cargar membresías:', error);
+        container.innerHTML = '<div class="text-center py-5 text-muted">Error al cargar datos</div>';
+    }
+}
+
+function getEstadoMembresia(estado) {
+    switch(estado) {
+        case 'A': return '<span class="badge bg-success">Activa</span>';
+        case 'V': return '<span class="badge bg-danger">Vencida</span>';
+        case 'C': return '<span class="badge bg-secondary">Cancelada</span>';
+        default: return '<span class="badge bg-secondary">-</span>';
+    }
+}
+
+function formatearFecha(fecha) {
+    if (!fecha) return '-';
+    return new Date(fecha).toLocaleDateString('es-PE');
+}
+
+document.addEventListener('DOMContentLoaded', cargarMembresias);
+</script>

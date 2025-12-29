@@ -1,4 +1,5 @@
-
+const { sequelize } = require('../database/conexionsqualize');
+const { QueryTypes } = require('sequelize');
 
 module.exports = {
     // Render de páginas públicas
@@ -48,7 +49,33 @@ module.exports = {
         res.render('pedidos/carrito', { layout: 'public' });
     },
     async getCheckout(req, res) {
-        res.render('pedidos/checkout', { layout: 'public' });
+        try {
+            // Consultar configuración de OpenPay desde la tabla PasarelaPago
+            const pasarela = await sequelize.query(
+                `SELECT merchantid, publickey, ambiente 
+                 FROM PasarelaPago 
+                 WHERE codpasarela = 'OPP' AND estado = 'S'`,
+                { type: QueryTypes.SELECT }
+            );
+
+            const openpayConfig = pasarela[0] || {};
+            const isSandbox = openpayConfig.ambiente === 'SANDBOX';
+
+            res.render('pedidos/checkout', { 
+                layout: 'public',
+                openpayMerchantId: openpayConfig.merchantid || '',
+                openpayPublicKey: openpayConfig.publickey || '',
+                openpayIsSandbox: isSandbox
+            });
+        } catch (error) {
+            console.error('Error al obtener configuración de pasarela:', error);
+            res.render('pedidos/checkout', { 
+                layout: 'public',
+                openpayMerchantId: '',
+                openpayPublicKey: '',
+                openpayIsSandbox: true
+            });
+        }
     },
     async getConfirmacion(req, res) {
         res.render('pedidos/confirmacion', { layout: 'public' });

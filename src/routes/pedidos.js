@@ -12,7 +12,6 @@ router.get('/confirmacion', controllerrender.getConfirmacion);
 // API - Obtener datos
 router.get('/api/productos', controllerpedidos.getProductos);
 router.get('/api/membresias', controllerpedidos.getMembresias);
-router.get('/api/openpay-config', controllerpedidos.getOpenpayConfig);
 router.get('/api/confirmacion/:id', controllerpedidos.getConfirmacionData);
 router.get('/api/estado-pago/:transactionId', controllerpedidos.getEstadoPago);
 

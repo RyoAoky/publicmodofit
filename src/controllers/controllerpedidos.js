@@ -1,28 +1,36 @@
 const { sequelize } = require('../database/conexionsqualize');
 const { QueryTypes } = require('sequelize');
-const dotenv = require('dotenv');
-dotenv.config();
+const axios = require('axios');
 
-// Configuración de OpenPay
-const OPENPAY_MERCHANT_ID = process.env.OPENPAY_MERCHANT_ID;
-const OPENPAY_PRIVATE_KEY = process.env.OPENPAY_PRIVATE_KEY;
-const OPENPAY_PUBLIC_KEY = process.env.OPENPAY_PUBLIC_KEY;
-const OPENPAY_SANDBOX = process.env.OPENPAY_SANDBOX === 'true';
-const OPENPAY_API_URL = OPENPAY_SANDBOX 
-    ? 'https://sandbox-api.openpay.pe/v1' 
-    : 'https://api.openpay.pe/v1';
+// Función helper para obtener configuración de OpenPay desde la BD
+async function getOpenpayConfigFromDB() {
+    const pasarela = await sequelize.query(
+        `SELECT merchantid, publickey, privatekey, ambiente, urlapibase 
+         FROM PasarelaPago 
+         WHERE codpasarela = 'OPP' AND estado = 'S'`,
+        { type: QueryTypes.SELECT }
+    );
+    
+    if (!pasarela || pasarela.length === 0) {
+        throw new Error('Configuración de OpenPay no encontrada en la base de datos');
+    }
+    
+    const config = pasarela[0];
+    const isSandbox = config.ambiente === 'SANDBOX';
+    const apiUrl = config.urlapibase || (isSandbox 
+        ? 'https://sandbox-api.openpay.pe/v1' 
+        : 'https://api.openpay.pe/v1');
+    
+    return {
+        merchantId: config.merchantid,
+        privateKey: config.privatekey,
+        publicKey: config.publickey,
+        isSandbox,
+        apiUrl
+    };
+}
 
 module.exports = {
-    // Obtener configuración pública de OpenPay
-    getOpenpayConfig(req, res) {
-        res.json({
-            success: true,
-            merchantId: OPENPAY_MERCHANT_ID,
-            publicKey: OPENPAY_PUBLIC_KEY,
-            sandbox: OPENPAY_SANDBOX
-        });
-    },
-
     // Obtener productos disponibles
     async getProductos(req, res) {
         try {
@@ -59,6 +67,9 @@ module.exports = {
             const { token_id, device_session_id, items, datosCliente, total } = req.body;
             const idCliente = req.user ? req.user.idcli : null;
 
+            // Obtener configuración de OpenPay desde BD
+            const openpayConfig = await getOpenpayConfigFromDB();
+
             // Crear cargo en OpenPay
             const chargeData = {
                 source_id: token_id,
@@ -75,13 +86,12 @@ module.exports = {
                 }
             };
 
-            const axios = require('axios');
             const openpayResponse = await axios.post(
-                `${OPENPAY_API_URL}/${OPENPAY_MERCHANT_ID}/charges`,
+                `${openpayConfig.apiUrl}/${openpayConfig.merchantId}/charges`,
                 chargeData,
                 {
                     auth: {
-                        username: OPENPAY_PRIVATE_KEY,
+                        username: openpayConfig.privateKey,
                         password: ''
                     },
                     headers: {
@@ -169,12 +179,14 @@ module.exports = {
         try {
             const { transactionId } = req.params;
 
-            const axios = require('axios');
+            // Obtener configuración de OpenPay desde BD
+            const openpayConfig = await getOpenpayConfigFromDB();
+
             const openpayResponse = await axios.get(
-                `${OPENPAY_API_URL}/${OPENPAY_MERCHANT_ID}/charges/${transactionId}`,
+                `${openpayConfig.apiUrl}/${openpayConfig.merchantId}/charges/${transactionId}`,
                 {
                     auth: {
-                        username: OPENPAY_PRIVATE_KEY,
+                        username: openpayConfig.privateKey,
                         password: ''
                     }
                 }

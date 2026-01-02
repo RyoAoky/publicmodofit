@@ -2,6 +2,7 @@
     <div class="container">
         <h2 class="fw-bold mb-4"><i class="bi bi-credit-card me-2"></i>Finalizar Compra</h2>
 
+        <form id="payment-form" onsubmit="return false;">
         <div class="row g-4">
             <div class="col-lg-8">
                 <!-- Datos del cliente -->
@@ -18,11 +19,11 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Nombre *</label>
-                                <input type="text" class="form-control" id="nombre" required>
+                                <input type="text" class="form-control" id="nombre" data-openpay-card="holder_name_first" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Apellido *</label>
-                                <input type="text" class="form-control" id="apellido" required>
+                                <input type="text" class="form-control" id="apellido" data-openpay-card="holder_name_last" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Correo electrónico *</label>
@@ -31,6 +32,20 @@
                             <div class="col-md-6">
                                 <label class="form-label">Teléfono *</label>
                                 <input type="tel" class="form-control" id="telefono" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Tipo de Documento *</label>
+                                <select class="form-select" id="tipoDocumento" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="DNI">DNI</option>
+                                    <option value="PASAPORTE">Pasaporte</option>
+                                    <option value="CE">Carnet de Extranjería</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">Número de Documento *</label>
+                                <input type="text" class="form-control" id="numeroDocumento" placeholder="Ingresa tu documento" required>
+                                <div class="form-text" id="docHelp">Selecciona el tipo de documento primero</div>
                             </div>
                         </div>
                     </div>
@@ -62,12 +77,12 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Número de tarjeta *</label>
-                                <input type="text" class="form-control" id="cardNumber"
-                                    placeholder="1234 5678 9012 3456" maxlength="19" required>
+                                <input type="text" class="form-control" id="cardNumber" data-openpay-card="card_number"
+                                    placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Mes *</label>
-                                <select class="form-select" id="expirationMonth" required>
+                                <select class="form-select" id="expirationMonth" data-openpay-card="expiration_month" required>
                                     <option value="">Mes</option>
                                     <option value="01">01</option>
                                     <option value="02">02</option>
@@ -85,17 +100,19 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Año *</label>
-                                <select class="form-select" id="expirationYear" required>
+                                <select class="form-select" id="expirationYear" data-openpay-card="expiration_year" required>
                                     <option value="">Año</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">CVV *</label>
-                                <input type="text" class="form-control" id="cvv" placeholder="123" maxlength="4"
-                                    required>
+                                <input type="text" class="form-control" id="cvv" data-openpay-card="cvv2" placeholder="123" maxlength="4"
+                                    autocomplete="cc-csc" required>
                             </div>
                         </div>
 
+                        <!-- Campo oculto para device_session_id -->
+                        <input type="hidden" name="deviceIdHiddenFieldName" id="deviceIdHiddenFieldName">
 
                         <div class="alert alert-light mt-3">
                             <i class="bi bi-shield-check me-2 text-success"></i>
@@ -141,6 +158,7 @@
                 </div>
             </div>
         </div>
+        </form>
     </div>
 </section>
 
@@ -149,6 +167,9 @@
 <input type="hidden" id="openpay-public-key" value="{{openpayPublicKey}}">
 <input type="hidden" id="openpay-sandbox" value="{{openpayIsSandbox}}">
 
+<!-- jQuery (requerido por OpenPay.js según documentación oficial) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<!-- OpenPay.js -->
 <script src="https://js.openpay.pe/openpay.v1.min.js"></script>
 <script src="https://js.openpay.pe/openpay-data.v1.min.js"></script>
 <script>
@@ -159,6 +180,13 @@ const openpayIsSandbox = document.getElementById('openpay-sandbox').value === 't
 let openpayDeviceSessionId = '';
 
 let carrito = JSON.parse(localStorage.getItem('modofit_carrito')) || [];
+
+// Configuración de longitud de documentos
+const DOC_CONFIG = {
+    'DNI': { min: 8, max: 8, pattern: /^\d{8}$/, help: 'DNI debe tener exactamente 8 dígitos' },
+    'PASAPORTE': { min: 6, max: 9, pattern: /^[A-Za-z0-9]{6,9}$/, help: 'Pasaporte: 6-9 caracteres alfanuméricos' },
+    'CE': { min: 9, max: 12, pattern: /^[A-Za-z0-9]{9,12}$/, help: 'Carnet de Extranjería: 9-12 caracteres' }
+};
 
 // Inicializar OpenPay (sin fetch, usa datos del servidor)
 function initOpenPay() {
@@ -180,14 +208,44 @@ function initOpenPay() {
 function llenarAnios() {
     const select = document.getElementById('expirationYear');
     const currentYear = new Date().getFullYear();
-    for (let i = 0; i < 15; i++) { // Aumenté a 15 años por si acaso
+    for (let i = 0; i < 15; i++) {
         const year = currentYear + i;
         const option = document.createElement('option');
-        option.value = year.toString().slice(-2); // Últimos 2 dígitos para OpenPay
+        option.value = year.toString().slice(-2);
         option.textContent = year;
         select.appendChild(option);
     }
 }
+
+// Validación de documento de identidad
+document.getElementById('tipoDocumento').addEventListener('change', function(e) {
+    const tipo = e.target.value;
+    const inputDoc = document.getElementById('numeroDocumento');
+    const helpText = document.getElementById('docHelp');
+    
+    if (tipo && DOC_CONFIG[tipo]) {
+        const config = DOC_CONFIG[tipo];
+        inputDoc.maxLength = config.max;
+        inputDoc.placeholder = `${config.min === config.max ? config.min : config.min + '-' + config.max} caracteres`;
+        helpText.textContent = config.help;
+        inputDoc.value = ''; // Limpiar al cambiar tipo
+    } else {
+        inputDoc.maxLength = 20;
+        inputDoc.placeholder = 'Ingresa tu documento';
+        helpText.textContent = 'Selecciona el tipo de documento primero';
+    }
+});
+
+document.getElementById('numeroDocumento').addEventListener('input', function(e) {
+    const tipo = document.getElementById('tipoDocumento').value;
+    if (tipo === 'DNI') {
+        // Solo números para DNI
+        e.target.value = e.target.value.replace(/\D/g, '');
+    } else {
+        // Alfanumérico para pasaporte y CE (mayúsculas)
+        e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    }
+});
 
 // --- NUEVO: Event Listeners para validación en tiempo real y detección de marca ---
 
@@ -253,15 +311,37 @@ function validarFormulario() {
     const apellido = document.getElementById('apellido').value.trim();
     const email = document.getElementById('email').value.trim();
     const telefono = document.getElementById('telefono').value.trim();
+    const tipoDocumento = document.getElementById('tipoDocumento').value;
+    const numeroDocumento = document.getElementById('numeroDocumento').value.trim();
     
     if (!nombre || !apellido || !email || !telefono) {
         Swal.fire('Faltan datos', 'Por favor completa todos los datos de contacto', 'warning');
         return false;
     }
 
+    // Validar documento de identidad
+    if (!tipoDocumento) {
+        Swal.fire('Falta documento', 'Selecciona el tipo de documento', 'warning');
+        return false;
+    }
+    
+    if (!numeroDocumento) {
+        Swal.fire('Falta documento', 'Ingresa el número de documento', 'warning');
+        return false;
+    }
+    
+    const docConfig = DOC_CONFIG[tipoDocumento];
+    if (docConfig && !docConfig.pattern.test(numeroDocumento)) {
+        Swal.fire('Documento inválido', docConfig.help, 'warning');
+        document.getElementById('numeroDocumento').classList.add('is-invalid');
+        return false;
+    } else {
+        document.getElementById('numeroDocumento').classList.remove('is-invalid');
+    }
+
     // Datos de tarjeta
     const holderName = document.getElementById('holderName').value.trim();
-    const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, ''); // Quitamos espacios
+    const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
     const expirationMonth = document.getElementById('expirationMonth').value;
     const expirationYear = document.getElementById('expirationYear').value;
     const cvv = document.getElementById('cvv').value;
@@ -299,6 +379,13 @@ async function procesarPago() {
     // Si la validación falla, se detiene aquí
     if (!validarFormulario()) return;
     
+    // Verificar que hay un plan en el carrito
+    const planItem = carrito.find(item => item.tipo === 'plan');
+    if (!planItem) {
+        Swal.fire('Error', 'No hay un plan de suscripción en el carrito', 'warning');
+        return;
+    }
+    
     // Obtener valores limpios nuevamente
     const holderName = document.getElementById('holderName').value.trim();
     const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
@@ -311,16 +398,17 @@ async function procesarPago() {
     const apellido = document.getElementById('apellido').value.trim();
     const email = document.getElementById('email').value.trim();
     const telefono = document.getElementById('telefono').value.trim();
-    const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+    const tipoDocumento = document.getElementById('tipoDocumento').value;
+    const numeroDocumento = document.getElementById('numeroDocumento').value.trim();
     
     Swal.fire({
-        title: 'Procesando pago...',
-        text: 'Conectando con el banco, por favor espera...',
+        title: 'Procesando suscripción...',
+        html: '<p>Validando datos y conectando con OpenPay...</p><p class="text-muted small">Esto puede tomar unos segundos</p>',
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading()
     });
     
-    // Crear token
+    // Crear token de tarjeta
     OpenPay.token.create({
         card_number: cardNumber,
         holder_name: holderName,
@@ -328,40 +416,56 @@ async function procesarPago() {
         expiration_month: expirationMonth,
         cvv2: cvv
     }, async function(response) {
-        // SUCCESS CALLBACK
+        // SUCCESS CALLBACK - Token creado
         try {
             const token_id = response.data.id;
             
-            // Enviar a TU backend (Node.js)
-            const pagoResponse = await fetch('/pedidos/api/procesar-pago', {
+            Swal.update({
+                html: '<p>Token generado. Creando suscripción...</p>'
+            });
+            
+            // Enviar a backend para el flujo completo de suscripción
+            const suscripcionResponse = await fetch('/pedidos/api/procesar-suscripcion', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     token_id: token_id,
                     device_session_id: openpayDeviceSessionId,
-                    items: carrito,
-                    datosCliente: { nombre, apellido, email, telefono },
-                    total: total
+                    datosCliente: { 
+                        nombre, 
+                        apellido, 
+                        email, 
+                        telefono,
+                        tipoDocumento,
+                        numeroDocumento
+                    },
+                    plan: {
+                        idplanpas: planItem.idplanpas,
+                        barcpro: planItem.id, // barcpro del producto
+                        nombre: planItem.nombre,
+                        precio: planItem.precio
+                    }
                 })
             });
             
-            const data = await pagoResponse.json();
+            const data = await suscripcionResponse.json();
             
             if (data.success) {
                 localStorage.removeItem('modofit_carrito');
                 Swal.fire({
                     icon: 'success',
-                    title: '¡Pago Aprobado!',
-                    text: `Pedido #${data.data.idPedido} generado correctamente.`,
-                    confirmButtonText: 'Ver Recibo'
+                    title: '¡Suscripción Exitosa!',
+                    html: `
+                        <p>Tu membresía <strong>${planItem.nombre}</strong> ha sido activada.</p>
+                        <p class="text-muted small">ID Suscripción: ${data.data.subscriptionId}</p>
+                    `,
+                    confirmButtonText: 'Ver mi Dashboard'
                 }).then(() => {
-                    window.location.href = '/pedidos/confirmacion?id=' + data.data.idPedido;
+                    window.location.href = '/dashboard/membresias';
                 });
             } else {
-                // Errores de negocio (fondos insuficientes, denegada por banco, etc)
                 console.error("Error Backend:", data);
-                let msg = data.message || 'La transacción fue rechazada.';
-                Swal.fire('Transacción Fallida', msg, 'error');
+                Swal.fire('Error', data.message || 'No se pudo procesar la suscripción', 'error');
             }
         } catch (error) {
             console.error(error);
@@ -372,7 +476,6 @@ async function procesarPago() {
         console.error("Error OpenPay Token:", error);
         let mensaje = 'No se pudo procesar la tarjeta.';
         
-        // Mapeo de errores comunes de OpenPay
         if (error.data && error.data.description) {
             mensaje = error.data.description;
         } else if (error.message) {

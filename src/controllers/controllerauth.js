@@ -56,7 +56,7 @@ module.exports = {
             // Insertar nuevo cliente
             await sequelize.query(
                 `INSERT INTO Cliente (nomcli, apecli, emailcli, celcli, passcli, estcli, fecregcli) 
-                 VALUES (:nombre, :apellido, :email, :telefono, :password, 'A', GETDATE())`,
+                 VALUES (:nombre, :apellido, :email, :telefono, :password, 'S', GETDATE())`,
                 {
                     replacements: { 
                         nombre, 

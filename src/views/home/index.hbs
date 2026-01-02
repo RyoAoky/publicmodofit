@@ -80,70 +80,41 @@
             <p class="text-muted">Elige el plan que mejor se adapte a ti</p>
         </div>
         <div class="row g-4 justify-content-center">
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow">
-                    <div class="card-header bg-secondary text-light text-center py-4">
-                        <h4 class="mb-0">Plan Básico</h4>
-                    </div>
-                    <div class="card-body text-center p-4">
-                        <h2 class="display-4 fw-bold text-primary">S/ 99</h2>
-                        <p class="text-muted mb-4">/mes</p>
-                        <ul class="list-unstyled">
-                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Acceso a máquinas</li>
-                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Vestidores y duchas</li>
-                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Casillero personal</li>
-                            <li class="mb-3 text-muted"><i class="bi bi-x-circle-fill text-danger me-2"></i>Clases grupales</li>
-                            <li class="mb-3 text-muted"><i class="bi bi-x-circle-fill text-danger me-2"></i>Nutricionista</li>
-                        </ul>
-                    </div>
-                    <div class="card-footer bg-transparent border-0 p-4">
-                        <a href="/pedidos" class="btn btn-outline-primary w-100">Elegir Plan</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-lg border-primary">
-                    <div class="card-header bg-primary text-light text-center py-4">
-                        <span class="badge bg-warning text-dark mb-2">MÁS POPULAR</span>
-                        <h4 class="mb-0">Plan Premium</h4>
-                    </div>
-                    <div class="card-body text-center p-4">
-                        <h2 class="display-4 fw-bold text-primary">S/ 149</h2>
-                        <p class="text-muted mb-4">/mes</p>
-                        <ul class="list-unstyled">
-                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Todo del plan Básico</li>
-                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Clases grupales ilimitadas</li>
-                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>1 sesión nutricionista/mes</li>
-                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>App de seguimiento</li>
-                            <li class="mb-3 text-muted"><i class="bi bi-x-circle-fill text-danger me-2"></i>Entrenador personal</li>
-                        </ul>
-                    </div>
-                    <div class="card-footer bg-transparent border-0 p-4">
-                        <a href="/pedidos" class="btn btn-primary w-100">Elegir Plan</a>
+            {{#if planes.length}}
+                {{#each planes}}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 {{#if @first}}shadow{{else}}{{#if @last}}shadow{{else}}shadow-lg border-primary{{/if}}{{/if}}">
+                        <div class="card-header {{#if @first}}bg-secondary{{else}}{{#if @last}}bg-dark{{else}}bg-primary{{/if}}{{/if}} text-light text-center py-4">
+                            {{#unless @first}}{{#unless @last}}
+                            <span class="badge bg-warning text-dark mb-2">MÁS POPULAR</span>
+                            {{/unless}}{{/unless}}
+                            <h4 class="mb-0">{{#if nomplanext}}{{nomplanext}}{{else}}{{despro}}{{/if}}</h4>
+                        </div>
+                        <div class="card-body text-center p-4">
+                            <h2 class="display-4 fw-bold text-primary">{{moneda}} {{formatPrecio precio}}</h2>
+                            <p class="text-muted mb-4">/{{frecuenciaTexto frecuencianum frecuenciaunidad}}</p>
+                            <p class="text-muted mb-3">{{despro}}</p>
+                            {{#if durpro}}
+                            <p class="small text-muted mb-2"><i class="bi bi-clock me-1"></i>Duración: {{durpro}} días</p>
+                            {{/if}}
+                            {{#if diasprueba}}
+                            <p class="small text-success mb-2"><i class="bi bi-gift me-1"></i>{{diasprueba}} días de prueba gratis</p>
+                            {{/if}}
+                        </div>
+                        <div class="card-footer bg-transparent border-0 p-4">
+                            <a href="/pedidos" class="btn {{#if @first}}btn-outline-primary{{else}}{{#if @last}}btn-outline-dark{{else}}btn-primary{{/if}}{{/if}} w-100">
+                                <i class="bi bi-cart-plus me-2"></i>Elegir Plan
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow">
-                    <div class="card-header bg-dark text-light text-center py-4">
-                        <h4 class="mb-0">Plan VIP</h4>
-                    </div>
-                    <div class="card-body text-center p-4">
-                        <h2 class="display-4 fw-bold text-primary">S/ 249</h2>
-                        <p class="text-muted mb-4">/mes</p>
-                        <ul class="list-unstyled">
-                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Todo del plan Premium</li>
-                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Entrenador personal</li>
-                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Plan nutricional completo</li>
-                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Área VIP exclusiva</li>
-                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Toallas y amenities</li>
-                        </ul>
-                    </div>
-                    <div class="card-footer bg-transparent border-0 p-4">
-                        <a href="/pedidos" class="btn btn-outline-dark w-100">Elegir Plan</a>
-                    </div>
+                {{/each}}
+            {{else}}
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-card-list fs-1 text-muted"></i>
+                    <p class="mt-3 text-muted">Pronto tendremos planes disponibles para ti</p>
                 </div>
-            </div>
+            {{/if}}
         </div>
     </div>
 </section>

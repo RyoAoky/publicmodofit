@@ -1,34 +1,13 @@
+/**
+ * Controller de Pedidos para ModoFit Public
+ * Maneja las operaciones de productos, pagos y visualización de pedidos
+ * Utiliza controllersql para las operaciones de suscripción
+ */
+
 const { sequelize } = require('../database/conexionsqualize');
 const { QueryTypes } = require('sequelize');
-const axios = require('axios');
-
-// Función helper para obtener configuración de OpenPay desde la BD
-async function getOpenpayConfigFromDB() {
-    const pasarela = await sequelize.query(
-        `SELECT merchantid, publickey, privatekey, ambiente, urlapibase 
-         FROM PasarelaPago 
-         WHERE codpasarela = 'OPP' AND estado = 'S'`,
-        { type: QueryTypes.SELECT }
-    );
-    
-    if (!pasarela || pasarela.length === 0) {
-        throw new Error('Configuración de OpenPay no encontrada en la base de datos');
-    }
-    
-    const config = pasarela[0];
-    const isSandbox = config.ambiente === 'SANDBOX';
-    const apiUrl = config.urlapibase || (isSandbox 
-        ? 'https://sandbox-api.openpay.pe/v1' 
-        : 'https://api.openpay.pe/v1');
-    
-    return {
-        merchantId: config.merchantid,
-        privateKey: config.privatekey,
-        publicKey: config.publickey,
-        isSandbox,
-        apiUrl
-    };
-}
+const openpayService = require('../services/openpayService');
+const controllersql = require('./controllersql');
 
 module.exports = {
     // Obtener productos disponibles
@@ -46,36 +25,54 @@ module.exports = {
         }
     },
 
-    // Obtener tipos de membresía disponibles
+    // Obtener planes de membresía disponibles desde PasarelaPlan
     async getMembresias(req, res) {
         try {
-            const membresias = await sequelize.query(
-                `SELECT * FROM TipoMembresia WHERE esttm = 'A' ORDER BY pretm`,
+            const planes = await sequelize.query(
+                `SELECT 
+                    pp.idplanpas,
+                    pp.codplanext,
+                    pp.nomplanext,
+                    pp.precio,
+                    pp.moneda,
+                    pp.frecuencianum,
+                    pp.frecuenciaunidad,
+                    pp.diasprueba,
+                    p.idpro,
+                    p.barcpro,
+                    p.despro,
+                    p.picpro,
+                    p.durpro,
+                    p.cosvenpro,
+                    pas.nompasarela,
+                    pas.codpasarela
+                FROM PasarelaPlan pp
+                INNER JOIN Producto p ON pp.barcpro = p.barcpro
+                INNER JOIN PasarelaPago pas ON pp.idpasarela = pas.idpasarela
+                WHERE pp.estado = 'S' 
+                    AND p.estpro = 'S'
+                    AND pas.estado = 'S'
+                ORDER BY pp.precio ASC`,
                 { type: QueryTypes.SELECT }
             );
 
-            res.json({ success: true, data: membresias });
+            res.json({ success: true, data: planes });
         } catch (error) {
-            console.error('Error al obtener membresías:', error);
-            res.json({ success: false, message: 'Error al cargar membresías' });
+            console.error('Error al obtener planes de membresía:', error);
+            res.json({ success: false, message: 'Error al cargar planes de membresía' });
         }
     },
 
-    // Procesar pago con tarjeta (OpenPay)
+    // Procesar pago con tarjeta (OpenPay) - Pago único
     async postProcesarPago(req, res) {
         try {
             const { token_id, device_session_id, items, datosCliente, total } = req.body;
             const idCliente = req.user ? req.user.idcli : null;
 
-            // Obtener configuración de OpenPay desde BD
-            const openpayConfig = await getOpenpayConfigFromDB();
-
-            // Crear cargo en OpenPay
-            const chargeData = {
+            // Usar el servicio de OpenPay para crear el cargo
+            const resultadoCargo = await openpayService.crearCargo({
                 source_id: token_id,
-                method: 'card',
                 amount: total,
-                currency: 'PEN',
                 description: 'Compra en ModoFit',
                 device_session_id: device_session_id,
                 customer: {
@@ -84,23 +81,16 @@ module.exports = {
                     email: datosCliente.email,
                     phone_number: datosCliente.telefono
                 }
-            };
+            });
 
-            const openpayResponse = await axios.post(
-                `${openpayConfig.apiUrl}/${openpayConfig.merchantId}/charges`,
-                chargeData,
-                {
-                    auth: {
-                        username: openpayConfig.privateKey,
-                        password: ''
-                    },
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
+            if (!resultadoCargo.success) {
+                return res.json({ 
+                    success: false, 
+                    message: resultadoCargo.error || 'Error al procesar el pago'
+                });
+            }
 
-            if (openpayResponse.data.status === 'completed') {
+            if (resultadoCargo.cargo.status === 'completed') {
                 // Pago exitoso - crear pedido
                 const resultPedido = await sequelize.query(
                     `INSERT INTO Pedido (idcli, totped, metpagped, estped, fecped, refpago) 
@@ -110,7 +100,7 @@ module.exports = {
                         replacements: { 
                             idCliente, 
                             total, 
-                            refPago: openpayResponse.data.id
+                            refPago: resultadoCargo.cargo.id
                         },
                         type: QueryTypes.INSERT
                     }
@@ -142,8 +132,8 @@ module.exports = {
                     {
                         replacements: {
                             idPedido,
-                            transactionId: openpayResponse.data.id,
-                            authorization: openpayResponse.data.authorization,
+                            transactionId: resultadoCargo.cargo.id,
+                            authorization: resultadoCargo.cargo.authorization,
                             amount: total,
                             status: 'completed'
                         },
@@ -156,7 +146,7 @@ module.exports = {
                     message: 'Pago procesado correctamente',
                     data: {
                         idPedido,
-                        authorization: openpayResponse.data.authorization
+                        authorization: resultadoCargo.cargo.authorization
                     }
                 });
             } else {
@@ -227,6 +217,63 @@ module.exports = {
         } catch (error) {
             console.error('Error al obtener confirmación:', error);
             res.json({ success: false, message: 'Error al cargar confirmación del pedido' });
+        }
+    },
+
+    // =========================================================================
+    // PROCESAR SUSCRIPCIÓN COMPLETA (OpenPay)
+    // Delegado a controllersql para mejor organización
+    // =========================================================================
+    postProcesarSuscripcion: controllersql.procesarSuscripcionCompleta,
+
+    // =========================================================================
+    // ENDPOINTS ADICIONALES
+    // =========================================================================
+
+    // Verificar membresía activa por DNI
+    async getVerificarMembresia(req, res) {
+        try {
+            const { dni } = req.params;
+            const resultado = await controllersql.verificarMembresiaActiva(dni);
+            res.json({ success: true, data: resultado });
+        } catch (error) {
+            console.error('Error al verificar membresía:', error);
+            res.json({ success: false, message: 'Error al verificar membresía' });
+        }
+    },
+
+    // Obtener historial de suscripciones por DNI
+    async getHistorialSuscripciones(req, res) {
+        try {
+            const { dni } = req.params;
+            const historial = await controllersql.obtenerHistorialSuscripciones(dni);
+            res.json({ success: true, data: historial });
+        } catch (error) {
+            console.error('Error al obtener historial:', error);
+            res.json({ success: false, message: 'Error al obtener historial de suscripciones' });
+        }
+    },
+
+    // Health check del servicio OpenPay
+    async getHealthCheck(req, res) {
+        try {
+            const health = await controllersql.healthCheck();
+            res.json({ success: true, data: health });
+        } catch (error) {
+            console.error('Error en health check:', error);
+            res.json({ success: false, message: 'Error al verificar estado del servicio' });
+        }
+    },
+
+    // Validar documento de identidad
+    async postValidarDocumento(req, res) {
+        try {
+            const { tipoDocumento, numeroDocumento } = req.body;
+            const validacion = controllersql.validarDocumento(tipoDocumento, numeroDocumento);
+            res.json({ success: validacion.valido, message: validacion.mensaje || 'Documento válido' });
+        } catch (error) {
+            console.error('Error al validar documento:', error);
+            res.json({ success: false, message: 'Error al validar documento' });
         }
     }
 };

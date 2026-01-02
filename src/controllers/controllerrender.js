@@ -4,7 +4,47 @@ const { QueryTypes } = require('sequelize');
 module.exports = {
     // Render de páginas públicas
     async getHome(req, res) {
-        res.render('home/index', { layout: 'public' });
+        try {
+            // Obtener planes activos desde PasarelaPlan + Producto
+            const planes = await sequelize.query(
+                `SELECT 
+                    pp.idplanpas,
+                    pp.codplanext,
+                    pp.nomplanext,
+                    pp.precio,
+                    pp.moneda,
+                    pp.frecuencianum,
+                    pp.frecuenciaunidad,
+                    pp.diasprueba,
+                    p.idpro,
+                    p.barcpro,
+                    p.despro,
+                    p.picpro,
+                    p.durpro,
+                    pas.nompasarela
+                FROM PasarelaPlan pp
+                INNER JOIN Producto p ON pp.barcpro = p.barcpro
+                INNER JOIN PasarelaPago pas ON pp.idpasarela = pas.idpasarela
+                WHERE pp.estado = 'S' 
+                    AND p.estpro = 'S'
+                    AND pas.estado = 'S'
+                ORDER BY pp.precio ASC`,
+                { type: QueryTypes.SELECT }
+            );
+
+            res.render('home/index', { 
+                layout: 'public',
+                planes: planes,
+                tieneMultiplesPlanes: planes.length > 1
+            });
+        } catch (error) {
+            console.error('Error al cargar planes:', error);
+            res.render('home/index', { 
+                layout: 'public',
+                planes: [],
+                tieneMultiplesPlanes: false
+            });
+        }
     },
     async getServicios(req, res) {
         res.render('home/servicios', { layout: 'public' });

@@ -64,7 +64,20 @@
 // Carrito en localStorage
 let carrito = JSON.parse(localStorage.getItem('modofit_carrito')) || [];
 
-// Cargar membresías desde API
+// Obtener etiqueta de frecuencia legible
+function getFrecuenciaLabel(num, unidad) {
+    const unidades = {
+        'day': { singular: 'día', plural: 'días' },
+        'week': { singular: 'semana', plural: 'semanas' },
+        'month': { singular: 'mes', plural: 'meses' },
+        'year': { singular: 'año', plural: 'años' }
+    };
+    
+    const u = unidades[unidad] || { singular: unidad, plural: unidad };
+    return num === 1 ? `1 ${u.singular}` : `${num} ${u.plural}`;
+}
+
+// Cargar membresías/planes desde API (PasarelaPlan + Producto)
 async function cargarMembresias() {
     const container = document.getElementById('membresias-container');
     try {
@@ -72,75 +85,45 @@ async function cargarMembresias() {
         const data = await response.json();
         
         if (data.success && data.data.length > 0) {
-            container.innerHTML = data.data.map((m, index) => `
+            container.innerHTML = data.data.map((plan, index) => `
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 border-0 shadow-sm ${index === 1 ? 'border-primary' : ''}">
-                        ${index === 1 ? '<div class="card-header bg-primary text-light text-center"><span class="badge bg-warning text-dark">MÁS POPULAR</span></div>' : ''}
+                    <div class="card h-100 border-0 shadow-sm ${index === 1 ? 'border-primary border-2' : ''}">
+                        ${index === 1 ? '<div class="card-header bg-primary text-light text-center py-2"><span class="badge bg-warning text-dark">MÁS POPULAR</span></div>' : ''}
                         <div class="card-body text-center p-4">
-                            <h5 class="card-title fw-bold">${m.nomtm}</h5>
-                            <h3 class="text-primary fw-bold">S/ ${parseFloat(m.pretm).toFixed(2)}</h3>
-                            <p class="text-muted">${m.destm || ''}</p>
-                            <p class="small text-muted">Duración: ${m.duratm} días</p>
-                            <button class="btn btn-primary w-100" onclick="agregarAlCarrito('membresia', ${m.idtm}, '${m.nomtm}', ${m.pretm})">
-                                <i class="bi bi-cart-plus me-2"></i>Agregar al Carrito
+                            <h5 class="card-title fw-bold">${plan.nomplanext || plan.despro}</h5>
+                            <h3 class="text-primary fw-bold mb-3">
+                                ${plan.moneda} ${parseFloat(plan.precio).toFixed(2)}
+                                <small class="fs-6 text-muted fw-normal">/ ${getFrecuenciaLabel(plan.frecuencianum, plan.frecuenciaunidad)}</small>
+                            </h3>
+                            <p class="text-muted mb-2">${plan.despro}</p>
+                            ${plan.durpro ? `<p class="small text-muted mb-3"><i class="bi bi-clock me-1"></i>Duración: ${plan.durpro} días</p>` : ''}
+                            ${plan.diasprueba > 0 ? `<p class="small text-success mb-3"><i class="bi bi-gift me-1"></i>${plan.diasprueba} días de prueba gratis</p>` : ''}
+                            <button class="btn btn-primary w-100" 
+                                    onclick="agregarAlCarrito('plan', '${plan.barcpro}', '${(plan.nomplanext || plan.despro).replace(/'/g, "\\'")}', ${plan.precio}, ${plan.idplanpas})">
+                                <i class="bi bi-cart-plus me-2"></i>Suscribirse
                             </button>
+                        </div>
+                        <div class="card-footer bg-light border-0 text-center py-2">
+                            <small class="text-muted">
+                                <i class="bi bi-credit-card me-1"></i>Pago seguro con ${plan.nompasarela}
+                            </small>
                         </div>
                     </div>
                 </div>
             `).join('');
         } else {
-            // Membresías de ejemplo si no hay en BD
             container.innerHTML = `
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <h5 class="card-title fw-bold">Plan Básico</h5>
-                            <h3 class="text-primary fw-bold">S/ 99.00</h3>
-                            <p class="text-muted">Acceso a máquinas y vestidores</p>
-                            <p class="small text-muted">Duración: 30 días</p>
-                            <button class="btn btn-primary w-100" onclick="agregarAlCarrito('membresia', 1, 'Plan Básico', 99)">
-                                <i class="bi bi-cart-plus me-2"></i>Agregar al Carrito
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 border-0 shadow-sm border-primary">
-                        <div class="card-header bg-primary text-light text-center">
-                            <span class="badge bg-warning text-dark">MÁS POPULAR</span>
-                        </div>
-                        <div class="card-body text-center p-4">
-                            <h5 class="card-title fw-bold">Plan Premium</h5>
-                            <h3 class="text-primary fw-bold">S/ 149.00</h3>
-                            <p class="text-muted">Todo del básico + clases grupales</p>
-                            <p class="small text-muted">Duración: 30 días</p>
-                            <button class="btn btn-primary w-100" onclick="agregarAlCarrito('membresia', 2, 'Plan Premium', 149)">
-                                <i class="bi bi-cart-plus me-2"></i>Agregar al Carrito
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <h5 class="card-title fw-bold">Plan VIP</h5>
-                            <h3 class="text-primary fw-bold">S/ 249.00</h3>
-                            <p class="text-muted">Todo incluido + entrenador personal</p>
-                            <p class="small text-muted">Duración: 30 días</p>
-                            <button class="btn btn-primary w-100" onclick="agregarAlCarrito('membresia', 3, 'Plan VIP', 249)">
-                                <i class="bi bi-cart-plus me-2"></i>Agregar al Carrito
-                            </button>
-                        </div>
-                    </div>
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-card-list fs-1 text-muted"></i>
+                    <p class="mt-3 text-muted">No hay planes de membresía disponibles por el momento</p>
                 </div>
             `;
         }
     } catch (error) {
-        console.error('Error al cargar membresías:', error);
-        container.innerHTML = '<div class="col-12 text-center py-5"><p class="text-muted">Error al cargar membresías</p></div>';
+        console.error('Error al cargar planes:', error);
+        container.innerHTML = '<div class="col-12 text-center py-5"><p class="text-muted">Error al cargar planes de membresía</p></div>';
     }
 }
-
 // Cargar productos desde API
 async function cargarProductos() {
     const container = document.getElementById('productos-container');
@@ -177,10 +160,59 @@ async function cargarProductos() {
     }
 }
 
-function agregarAlCarrito(tipo, id, nombre, precio) {
+function agregarAlCarrito(tipo, id, nombre, precio, idplanpas = null) {
     const item = carrito.find(i => i.id === id && i.tipo === tipo);
     
-    if (item) {
+    if (tipo === 'plan') {
+        // Para planes/suscripciones, solo se permite 1 en el carrito
+        const planExistente = carrito.find(i => i.tipo === 'plan');
+        if (planExistente) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Ya tienes un plan',
+                text: 'Solo puedes tener un plan de membresía. ¿Deseas reemplazarlo?',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, reemplazar',
+                cancelButtonText: 'No'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Remover plan anterior
+                    const indexPlan = carrito.findIndex(i => i.tipo === 'plan');
+                    if (indexPlan > -1) carrito.splice(indexPlan, 1);
+                    // Agregar nuevo plan
+                    carrito.push({
+                        tipo,
+                        id, // barcpro
+                        idplanpas,
+                        nombre,
+                        precio,
+                        cantidad: 1
+                    });
+                    localStorage.setItem('modofit_carrito', JSON.stringify(carrito));
+                    actualizarCarritoUI();
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Plan actualizado!',
+                        text: nombre + ' es tu nuevo plan',
+                        showConfirmButton: false,
+                        timer: 1500,
+                        position: 'top-end',
+                        toast: true
+                    });
+                }
+            });
+            return;
+        }
+        // Agregar plan nuevo
+        carrito.push({
+            tipo,
+            id, // barcpro
+            idplanpas,
+            nombre,
+            precio,
+            cantidad: 1
+        });
+    } else if (item) {
         item.cantidad++;
     } else {
         carrito.push({

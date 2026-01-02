@@ -15,7 +15,16 @@ router.get('/api/membresias', controllerpedidos.getMembresias);
 router.get('/api/confirmacion/:id', controllerpedidos.getConfirmacionData);
 router.get('/api/estado-pago/:transactionId', controllerpedidos.getEstadoPago);
 
-// API - Procesar pago con tarjeta
+// API - Verificaciones y validaciones
+router.get('/api/verificar-membresia/:dni', controllerpedidos.getVerificarMembresia);
+router.get('/api/historial-suscripciones/:dni', controllerpedidos.getHistorialSuscripciones);
+router.get('/api/health', controllerpedidos.getHealthCheck);
+router.post('/api/validar-documento', controllerpedidos.postValidarDocumento);
+
+// API - Procesar pago con tarjeta (cobro único)
 router.post('/api/procesar-pago', controllerpedidos.postProcesarPago);
+
+// API - Procesar suscripción (flujo completo OpenPay)
+router.post('/api/procesar-suscripcion', controllerpedidos.postProcesarSuscripcion);
 
 module.exports = router;

@@ -11,7 +11,7 @@ passport.use('local.login', new LocalStrategy({
     try {
         // Buscar usuario por email en la tabla de clientes
         const result = await sequelize.query(
-            `SELECT * FROM Cliente WHERE emailcli = :email AND estcli = 'A'`,
+            `SELECT * FROM Usuario WHERE mailusu = :email AND estusu = 'S'`,
             {
                 replacements: { email },
                 type: QueryTypes.SELECT
@@ -20,7 +20,7 @@ passport.use('local.login', new LocalStrategy({
 
         if (result.length > 0) {
             const user = result[0];
-            const validPassword = await helpers.matchPassword(password, user.passcli);
+            const validPassword = await helpers.matchPassword(password, user.passusu);
             if (validPassword) {
                 done(null, user);
             } else {
@@ -35,19 +35,33 @@ passport.use('local.login', new LocalStrategy({
 }));
 
 passport.serializeUser((user, done) => {
-    done(null, user.idcli);
+    // Incluir tanto idusu como tokenusu en la sesión para validación de seguridad
+    // Requirements: 5.2, 1.1
+    done(null, { 
+        idusu: user.idusu, 
+        tokenusu: user.tokenusu 
+    });
 });
 
-passport.deserializeUser(async (id, done) => {
+passport.deserializeUser(async (sessionData, done) => {
     try {
+        // Validar usuario por token para mayor seguridad
+        // Requirements: 5.2, 1.1
         const result = await sequelize.query(
-            `SELECT * FROM Cliente WHERE idcli = :id AND estcli = 'A'`,
+            `SELECT * FROM Usuario WHERE tokenusu = :tokenusu AND estusu = 'S'`,
             {
-                replacements: { id },
+                replacements: { tokenusu: sessionData.tokenusu },
                 type: QueryTypes.SELECT
             }
         );
-        done(null, result[0]);
+        
+        // Verificar que el usuario existe y que el idusu coincide con la sesión
+        if (result.length > 0 && result[0].idusu === sessionData.idusu) {
+            done(null, result[0]);
+        } else {
+            // Token inválido o idusu no coincide - sesión comprometida
+            done(new Error('Sesión inválida'), null);
+        }
     } catch (error) {
         done(error);
     }

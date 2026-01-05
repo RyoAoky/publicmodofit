@@ -1,5 +1,4 @@
-USE [ModoFit]
-GO
+
 /****** Object:  Table [dbo].[Accesos]    Script Date: 25/12/2025 17:55:30 ******/
 SET ANSI_NULLS ON
 GO

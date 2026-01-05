@@ -1,6 +1,3 @@
-USE [ModoFit]
-GO
-
 /* ==========================================================================
    SISTEMA MODOFIT - MÓDULO DE PASARELA DE PAGOS
    Diseñado para SQL Server
@@ -176,64 +173,7 @@ CREATE TABLE [dbo].[PasarelaMarcaTarjeta](
 GO
 
 -- ============================================================================
--- 6. CAJA VIRTUAL (Para pagos online - Se abre/cierra automáticamente por día)
--- ============================================================================
-CREATE TABLE [dbo].[CajaVirtual](
-    [idcajavirtual] [int] IDENTITY(1,1) NOT NULL,
-    [idpasarela] [int] NOT NULL,
-    [fecoperacion] [date] NOT NULL,                 -- Fecha de operación (día)
-    
-    -- Horarios automáticos
-    [apertura] [datetime] NOT NULL,                 -- Primera transacción del día
-    [cierre] [datetime] NULL,                       -- Última transacción o cierre automático
-    
-    -- Totales del día
-    [canttransacciones] [int] DEFAULT 0,
-    [montbruto] [decimal](12,2) DEFAULT 0.00,       -- Total cobrado a clientes
-    [montcomision] [decimal](12,2) DEFAULT 0.00,    -- Total comisiones pasarela
-    [montimpuesto] [decimal](12,2) DEFAULT 0.00,    -- Total IGV sobre comisiones
-    [montneto] [decimal](12,2) DEFAULT 0.00,        -- Neto a recibir
-    
-    -- Conciliación con banco
-    [fecconciliacion] [datetime] NULL,
-    [montconciliado] [decimal](12,2) NULL,
-    [diferenciaconcil] [decimal](12,2) NULL,
-    [obsconciliacion] [varchar](500) NULL,
-    
-    -- Estado
-    [estcajavirtual] [char](1) DEFAULT 'A',         -- A: Abierta, C: Cerrada, R: Conciliada
-    [idusu] [int] NULL,
-    [feccre] [datetime] DEFAULT GETDATE(),
-    [fecmov] [datetime] NULL,
-    
-    CONSTRAINT [PK_CajaVirtual] PRIMARY KEY CLUSTERED ([idcajavirtual] ASC),
-    CONSTRAINT [FK_CajaVirtual_Pasarela] FOREIGN KEY ([idpasarela]) 
-        REFERENCES [dbo].[PasarelaPago]([idpasarela]),
-    CONSTRAINT [UQ_CajaVirtual_FechaPasarela] UNIQUE ([idpasarela], [fecoperacion])
-) ON [PRIMARY]
-GO
-
--- ============================================================================
--- 7. RELACIÓN CAJA FÍSICA - CAJA VIRTUAL (Para cuadres diarios)
--- ============================================================================
-CREATE TABLE [dbo].[CajaCajaVirtual](
-    [idcajacajavirtual] [int] IDENTITY(1,1) NOT NULL,
-    [idcaja] [int] NOT NULL,                        -- FK a tu tabla Caja existente
-    [idcajavirtual] [int] NOT NULL,
-    [monttransferido] [decimal](12,2) DEFAULT 0.00,
-    [feccre] [datetime] DEFAULT GETDATE(),
-    [idusu] [int] NULL,
-    
-    CONSTRAINT [PK_CajaCajaVirtual] PRIMARY KEY CLUSTERED ([idcajacajavirtual] ASC),
-    CONSTRAINT [FK_CajaCajaVirtual_Caja] FOREIGN KEY ([idcaja]) 
-        REFERENCES [dbo].[Caja]([idcaja]),
-    CONSTRAINT [FK_CajaCajaVirtual_CajaVirtual] FOREIGN KEY ([idcajavirtual]) 
-        REFERENCES [dbo].[CajaVirtual]([idcajavirtual])
-) ON [PRIMARY]
-GO
-
--- ============================================================================
--- 8. PLANES DE SUSCRIPCIÓN (Vinculación con Productos/Membresías)
+-- 6. PLANES DE SUSCRIPCIÓN (Vinculación con Productos/Membresías)
 -- ============================================================================
 CREATE TABLE [dbo].[PasarelaPlan](
     [idplanpas] [int] IDENTITY(1,1) NOT NULL,
@@ -340,14 +280,18 @@ CREATE TABLE [dbo].[PasarelaTarjeta](
     [estado] [char](1) DEFAULT 'S',                 -- S: Disponible, N: Eliminada, B: Bloqueada
     [feccre] [datetime] DEFAULT GETDATE(),
     [fecmov] [datetime] NULL,
+    [idapilog] [int] NULL,
     
     CONSTRAINT [PK_PasarelaTarjeta] PRIMARY KEY CLUSTERED ([idtarjpas] ASC),
     CONSTRAINT [FK_PasarelaTarjeta_Cliente] FOREIGN KEY ([idclipas]) 
         REFERENCES [dbo].[PasarelaCliente]([idclipas]),
     CONSTRAINT [FK_PasarelaTarjeta_Marca] FOREIGN KEY ([idmarcatarj]) 
         REFERENCES [dbo].[PasarelaMarcaTarjeta]([idmarcatarj])
+    CONSTRAINT [FK_PasarelaTarjeta_ApiLog] FOREIGN KEY ([idapilog]) 
+        REFERENCES [dbo].[PasarelaApiLog]([idapilog])
 ) ON [PRIMARY]
 GO
+
 
 -- ============================================================================
 -- 11. SESIONES DE PAGO (Historial de intentos de pago del usuario)
@@ -455,6 +399,7 @@ CREATE TABLE [dbo].[PasarelaSuscripcion](
     [idusu] [int] NULL,
     [feccre] [datetime] DEFAULT GETDATE(),
     [fecmov] [datetime] NULL,
+    [idapilog] [int] NULL,
     
     CONSTRAINT [PK_PasarelaSuscripcion] PRIMARY KEY CLUSTERED ([idsuscpas] ASC),
     CONSTRAINT [FK_PasarelaSuscripcion_Cliente] FOREIGN KEY ([idclipas]) 
@@ -466,9 +411,13 @@ CREATE TABLE [dbo].[PasarelaSuscripcion](
     CONSTRAINT [FK_PasarelaSuscripcion_Estado] FOREIGN KEY ([idestadopas]) 
         REFERENCES [dbo].[PasarelaEstado]([idestadopas]),
     CONSTRAINT [FK_PasarelaSuscripcion_Membresia] FOREIGN KEY ([idmem]) 
-        REFERENCES [dbo].[Membresia]([idmem])
+        REFERENCES [dbo].[Membresia]([idmem]),
+    CONSTRAINT [FK_PasarelaSuscripcion_ApiLog] FOREIGN KEY ([idapilog]) 
+        REFERENCES [dbo].[PasarelaApiLog]([idapilog])
 ) ON [PRIMARY]
 GO
+
+
 
 -- ============================================================================
 -- 14. TRANSACCIONES (TABLA CRÍTICA - Caja y Auditoría)
@@ -476,7 +425,7 @@ GO
 CREATE TABLE [dbo].[PasarelaTransaccion](
     [idtranspas] [int] IDENTITY(1,1) NOT NULL,
     [idpasarela] [int] NOT NULL,
-    [idcajavirtual] [int] NULL,                     -- FK a CajaVirtual del día
+    [idcaja] [int] NULL,                            -- FK a Caja (tipocaja='V')
     
     -- Vinculación con sistema ModoFit
     [idusu] [int] NOT NULL,                         -- Usuario que paga
@@ -551,12 +500,13 @@ CREATE TABLE [dbo].[PasarelaTransaccion](
     [estado] [char](1) DEFAULT 'S',
     [fectransaccion] [datetime] DEFAULT GETDATE(),
     [fecmov] [datetime] NULL,
+    [idapilog] [int] NULL,
     
     CONSTRAINT [PK_PasarelaTransaccion] PRIMARY KEY CLUSTERED ([idtranspas] ASC),
     CONSTRAINT [FK_PasarelaTransaccion_Pasarela] FOREIGN KEY ([idpasarela]) 
         REFERENCES [dbo].[PasarelaPago]([idpasarela]),
-    CONSTRAINT [FK_PasarelaTransaccion_CajaVirtual] FOREIGN KEY ([idcajavirtual]) 
-        REFERENCES [dbo].[CajaVirtual]([idcajavirtual]),
+    CONSTRAINT [FK_PasarelaTransaccion_Caja] FOREIGN KEY ([idcaja]) 
+        REFERENCES [dbo].[Caja]([idcaja]),
     CONSTRAINT [FK_PasarelaTransaccion_Usuario] FOREIGN KEY ([idusu]) 
         REFERENCES [dbo].[usuario]([idusu]),
     CONSTRAINT [FK_PasarelaTransaccion_Venta] FOREIGN KEY ([idven]) 
@@ -573,8 +523,11 @@ CREATE TABLE [dbo].[PasarelaTransaccion](
         REFERENCES [dbo].[PasarelaEstado]([idestadopas]),
     CONSTRAINT [FK_PasarelaTransaccion_Tarjeta] FOREIGN KEY ([idtarjpas]) 
         REFERENCES [dbo].[PasarelaTarjeta]([idtarjpas])
+    CONSTRAINT [FK_PasarelaTransaccion_Apilog] FOREIGN KEY ([idapilog]) 
+        REFERENCES [dbo].[Apilog]([idapilog])
 ) ON [PRIMARY]
 GO
+
 
 -- Índices para reportes y búsquedas
 CREATE NONCLUSTERED INDEX [IX_PasarelaTransaccion_Fecha] 
@@ -853,7 +806,7 @@ GO
 CREATE TABLE [dbo].[PasarelaReporteDiario](
     [idreportediario] [int] IDENTITY(1,1) NOT NULL,
     [idpasarela] [int] NOT NULL,
-    [idcajavirtual] [int] NULL,
+    [idcaja] [int] NULL,                            -- FK a Caja (tipocaja='V')
     [fecreporte] [date] NOT NULL,
     
     -- Transacciones
@@ -881,8 +834,8 @@ CREATE TABLE [dbo].[PasarelaReporteDiario](
     CONSTRAINT [PK_PasarelaReporteDiario] PRIMARY KEY CLUSTERED ([idreportediario] ASC),
     CONSTRAINT [FK_PasarelaReporteDiario_Pasarela] FOREIGN KEY ([idpasarela]) 
         REFERENCES [dbo].[PasarelaPago]([idpasarela]),
-    CONSTRAINT [FK_PasarelaReporteDiario_CajaVirtual] FOREIGN KEY ([idcajavirtual]) 
-        REFERENCES [dbo].[CajaVirtual]([idcajavirtual]),
+    CONSTRAINT [FK_PasarelaReporteDiario_Caja] FOREIGN KEY ([idcaja]) 
+        REFERENCES [dbo].[Caja]([idcaja]),
     CONSTRAINT [UQ_PasarelaReporteDiario_FechaPas] UNIQUE ([idpasarela], [fecreporte])
 ) ON [PRIMARY]
 GO
@@ -975,29 +928,28 @@ PRINT '============================================================'
 PRINT 'TABLAS DE PASARELA DE PAGOS CREADAS EXITOSAMENTE'
 PRINT '============================================================'
 PRINT ''
-PRINT 'RESUMEN DE TABLAS CREADAS (22 tablas):'
+PRINT 'RESUMEN DE TABLAS CREADAS (20 tablas + extensiones Caja):'
 PRINT '1.  PasarelaPago              - Configuración de pasarelas'
 PRINT '2.  PasarelaTipoTransaccion   - Catálogo tipos transacción'
 PRINT '3.  PasarelaEstado            - Estados por pasarela'
 PRINT '4.  PasarelaHomologacionError - Mapeo unificado de errores (UX)'
 PRINT '5.  PasarelaMarcaTarjeta      - Marcas de tarjetas'
-PRINT '6.  CajaVirtual               - Caja automática por día'
-PRINT '7.  CajaCajaVirtual           - Relación caja física-virtual'
-PRINT '8.  PasarelaPlan              - Planes de suscripción'
-PRINT '9.  PasarelaCliente           - Clientes en pasarela'
-PRINT '10. PasarelaTarjeta           - Tarjetas + BIN + Banco emisor'
-PRINT '11. PasarelaSesion            - Sesiones de pago'
-PRINT '12. PasarelaSesionHistorial   - Historial de sesiones'
-PRINT '13. PasarelaSuscripcion       - Suscripciones activas'
-PRINT '14. PasarelaTransaccion       - Transacciones (CIP/3DS/MultiMoneda)'
-PRINT '15. PasarelaWebhookLog        - Logs de webhooks recibidos'
-PRINT '16. PasarelaApiLog            - Logs de peticiones enviadas'
-PRINT '17. PasarelaNotificacion      - Notificaciones enviadas'
-PRINT '18. PasarelaReembolso         - Reembolsos'
-PRINT '19. PasarelaDisputa           - Disputas/Contracargos'
-PRINT '20. PasarelaConfigReintento   - Config reintentos'
-PRINT '21. PasarelaAuditoria         - Auditoría general'
-PRINT '22. PasarelaReporteDiario     - Reportes consolidados'
+PRINT '6.  CajaDetallePasarela       - Extensión de Caja para pasarela'
+PRINT '7.  PasarelaPlan              - Planes de suscripción'
+PRINT '8.  PasarelaCliente           - Clientes en pasarela'
+PRINT '9.  PasarelaTarjeta           - Tarjetas + BIN + Banco emisor'
+PRINT '10. PasarelaSesion            - Sesiones de pago'
+PRINT '11. PasarelaSesionHistorial   - Historial de sesiones'
+PRINT '12. PasarelaSuscripcion       - Suscripciones activas'
+PRINT '13. PasarelaTransaccion       - Transacciones (CIP/3DS/MultiMoneda)'
+PRINT '14. PasarelaWebhookLog        - Logs de webhooks recibidos'
+PRINT '15. PasarelaApiLog            - Logs de peticiones enviadas'
+PRINT '16. PasarelaNotificacion      - Notificaciones enviadas'
+PRINT '17. PasarelaReembolso         - Reembolsos'
+PRINT '18. PasarelaDisputa           - Disputas/Contracargos'
+PRINT '19. PasarelaConfigReintento   - Config reintentos'
+PRINT '20. PasarelaAuditoria         - Auditoría general'
+PRINT '21. PasarelaReporteDiario     - Reportes consolidados'
 PRINT ''
 PRINT 'NUEVA TABLA - PasarelaHomologacionError:'
 PRINT '- Mapea errores de cada pasarela a mensajes amigables'
@@ -1015,3 +967,229 @@ PRINT '- BIN/Metadatos: bin, bancoemisor, paisemisor, categoriatarjeta, fingerpr
 PRINT ''
 PRINT '============================================================'
 GO
+
+-- ============================================================================
+-- MODIFICACIONES PARA CAJA UNIFICADA Y EXTENSIÓN
+-- ============================================================================
+
+-- PASO 1: AGREGAR COLUMNAS A TABLA CAJA EXISTENTE
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Caja') AND name = 'tipocaja')
+BEGIN
+    ALTER TABLE [dbo].[Caja] ADD [tipocaja] [char](1) DEFAULT 'F' NOT NULL;
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Caja') AND name = 'origenapertura')
+BEGIN
+    ALTER TABLE [dbo].[Caja] ADD [origenapertura] [char](1) DEFAULT 'M' NOT NULL;
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Caja') AND name = 'estcaja')
+BEGIN
+    ALTER TABLE [dbo].[Caja] ADD [estcaja] [char](1) DEFAULT 'S' NOT NULL;
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Caja') AND name = 'fecoperacion')
+BEGIN
+    ALTER TABLE [dbo].[Caja] ADD [fecoperacion] [date] NULL;
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Caja') AND name = 'idpasarela')
+BEGIN
+    ALTER TABLE [dbo].[Caja] ADD [idpasarela] [int] NULL;
+END
+GO
+
+-- PASO 2: CREAR TABLA DE EXTENSIÓN PARA DETALLES DE PASARELA
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'CajaDetallePasarela')
+BEGIN
+    CREATE TABLE [dbo].[CajaDetallePasarela](
+        [idcajadetpas] [int] IDENTITY(1,1) NOT NULL,
+        [idcaja] [int] NOT NULL,
+        [idpasarela] [int] NOT NULL,
+        [canttransacciones] [int] DEFAULT 0,
+        [cantaprobadas] [int] DEFAULT 0,
+        [cantrechazadas] [int] DEFAULT 0,
+        [cantpendientes] [int] DEFAULT 0,
+        [cantreembolsos] [int] DEFAULT 0,
+        [montbruto] [decimal](12,2) DEFAULT 0.00,
+        [comisionporc] [decimal](6,4) DEFAULT 0.00,
+        [comisionfija] [decimal](12,2) DEFAULT 0.00,
+        [montcomision] [decimal](12,2) DEFAULT 0.00,
+        [montiva] [decimal](12,2) DEFAULT 0.00,
+        [montneto] [decimal](12,2) DEFAULT 0.00,
+        [montreembolsos] [decimal](12,2) DEFAULT 0.00,
+        [fecconciliacion] [datetime] NULL,
+        [montconciliado] [decimal](12,2) NULL,
+        [diferenciaconcil] [decimal](12,2) NULL,
+        [estadoconcil] [char](1) DEFAULT 'P',
+        [obsconciliacion] [varchar](500) NULL,
+        [feccre] [datetime] DEFAULT GETDATE(),
+        [fecmov] [datetime] NULL,
+        CONSTRAINT [PK_CajaDetallePasarela] PRIMARY KEY CLUSTERED ([idcajadetpas] ASC),
+        CONSTRAINT [FK_CajaDetallePasarela_Caja] FOREIGN KEY ([idcaja]) 
+            REFERENCES [dbo].[Caja]([idcaja]),
+        CONSTRAINT [UQ_CajaDetallePasarela_Caja] UNIQUE ([idcaja])
+    ) ON [PRIMARY];
+END
+GO
+
+-- PASO 3: ÍNDICES PARA OPTIMIZACIÓN
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Caja_TipoEstado')
+BEGIN
+    CREATE NONCLUSTERED INDEX [IX_Caja_TipoEstado] 
+    ON [dbo].[Caja] ([tipocaja], [estcaja])
+    INCLUDE ([fecoperacion], [apertura], [cierre]);
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Caja_FecOperacion')
+BEGIN
+    CREATE NONCLUSTERED INDEX [IX_Caja_FecOperacion] 
+    ON [dbo].[Caja] ([fecoperacion])
+    WHERE [tipocaja] = 'V';
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_CajaDetallePasarela_Conciliacion')
+BEGIN
+    CREATE NONCLUSTERED INDEX [IX_CajaDetallePasarela_Conciliacion'] 
+    ON [dbo].[CajaDetallePasarela] ([estadoconcil])
+    WHERE [estadoconcil] != 'C';
+END
+GO
+
+-- PASO 4: MODIFICAR TABLA VENTA PARA USAR CAJA UNIFICADA
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Venta') AND name = 'origenventa')
+BEGIN
+    ALTER TABLE [dbo].[Venta] ADD [origenventa] [char](1) DEFAULT 'F' NOT NULL;
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Venta') AND name = 'idtranspas')
+BEGIN
+    ALTER TABLE [dbo].[Venta] ADD [idtranspas] [int] NULL;
+END
+GO
+
+-- PASO 5: MODIFICAR TABLA MEMBRESIA
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Membresia') AND name = 'idsuscpas')
+BEGIN
+    ALTER TABLE [dbo].[Membresia] ADD [idsuscpas] [int] NULL;
+END
+GO
+
+-- PASO 6: MODIFICAR PASARELATRANSACCION - Cambiar idcajavirtual por idcaja
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('PasarelaTransaccion') AND name = 'idcaja')
+BEGIN
+    ALTER TABLE [dbo].[PasarelaTransaccion] ADD [idcaja] [int] NULL;
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('PasarelaTransaccion') AND name = 'idven')
+BEGIN
+    ALTER TABLE [dbo].[PasarelaTransaccion] ADD [idven] [int] NULL;
+END
+GO
+
+-- PASO 7: MODIFICAR PASARELASUSCRIPCION
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('PasarelaSuscripcion') AND name = 'idmem')
+BEGIN
+    ALTER TABLE [dbo].[PasarelaSuscripcion] ADD [idmem] [int] NULL;
+END
+GO
+CREATE NONCLUSTERED INDEX IX_Asistencia_idusu_fecasis
+ON Asistencia (idusu, fecasis DESC);
+go
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- ============================================================================
+-- DATOS DE TABLAS CATÁLOGO - GENERADOS AUTOMÁTICAMENTE
+-- Fecha: 2026-01-04 11:53:30
+-- ============================================================================
+ 
+-- 1. PASARELA PAGO (Configuración de pasarelas)
+-- ============================================================================
+INSERT INTO [PasarelaPago] ([nompasarela], [codpasarela], [ambiente], [merchantid], [publickey], [privatekey], [apikey], [comisionporc], [comisionfija], [impuestoporc], [moneda], [urlapibase], [idwebhook], [urlwebhook], [urlcheckout], [estado], [idusu]) VALUES ('Openpay', 'OPP', 'SANDBOX', 'mombnywqd7aymxo8rjwc', 'pk_2c01a539e8d5498ab3cffecb251bf3c5', 'sk_fcd73559804c451eb0f71339c386b881', '', 0.0000, 0.00, 18.00, 'PEN', 'https://sandbox-api.openpay.pe', 'wlwsrr02dmopwki69k4k', 'https://hook.us2.make.com/65g1mq9o528it2mjxvsmeb3ofg3c7gfu', '', 'S', 86);
+GO
+ 
+-- 2. PASARELA TIPO TRANSACCION
+-- ============================================================================
+INSERT INTO [PasarelaTipoTransaccion] ([codtipotrans], [destipotrans], [estado]) VALUES ('COBRO', 'Cobro único', 'S');
+INSERT INTO [PasarelaTipoTransaccion] ([codtipotrans], [destipotrans], [estado]) VALUES ('SUSCRIPCION', 'Pago de suscripción recurrente', 'S');
+INSERT INTO [PasarelaTipoTransaccion] ([codtipotrans], [destipotrans], [estado]) VALUES ('REEMBOLSO', 'Devolución de dinero', 'S');
+INSERT INTO [PasarelaTipoTransaccion] ([codtipotrans], [destipotrans], [estado]) VALUES ('PRECOBRO', 'Pre-autorización de cobro', 'S');
+INSERT INTO [PasarelaTipoTransaccion] ([codtipotrans], [destipotrans], [estado]) VALUES ('CAPTURA', 'Captura de pre-autorización', 'S');
+GO
+ 
+-- 3. PASARELA ESTADO (Estados por pasarela)
+-- ============================================================================
+INSERT INTO [PasarelaEstado] ([idpasarela], [codestadoext], [codestadoint], [desestado], [colorhex], [iconclass], [esfinal], [esexitoso], [espendiente], [estado]) VALUES (1, 'completed', 'COMPLETADO', 'Pago Exitoso', '#28a745', 'fa-check-circle', 'S', 'S', 'N', 'S');
+INSERT INTO [PasarelaEstado] ([idpasarela], [codestadoext], [codestadoint], [desestado], [colorhex], [iconclass], [esfinal], [esexitoso], [espendiente], [estado]) VALUES (1, 'in_progress', 'PENDIENTE', 'Pendiente de Pago', '#ffc107', 'fa-clock', 'N', 'N', 'S', 'S');
+INSERT INTO [PasarelaEstado] ([idpasarela], [codestadoext], [codestadoint], [desestado], [colorhex], [iconclass], [esfinal], [esexitoso], [espendiente], [estado]) VALUES (1, 'failed', 'FALLIDO', 'Pago Rechazado', '#dc3545', 'fa-times-circle', 'S', 'N', 'N', 'S');
+INSERT INTO [PasarelaEstado] ([idpasarela], [codestadoext], [codestadoint], [desestado], [colorhex], [iconclass], [esfinal], [esexitoso], [espendiente], [estado]) VALUES (1, 'cancelled', 'CANCELADO', 'Operación Cancelada', '#6c757d', 'fa-ban', 'S', 'N', 'N', 'S');
+INSERT INTO [PasarelaEstado] ([idpasarela], [codestadoext], [codestadoint], [desestado], [colorhex], [iconclass], [esfinal], [esexitoso], [espendiente], [estado]) VALUES (1, 'refunded', 'REEMBOLSADO', 'Pago Reembolsado', '#17a2b8', 'fa-undo', 'S', 'N', 'N', 'S');
+INSERT INTO [PasarelaEstado] ([idpasarela], [codestadoext], [codestadoint], [desestado], [colorhex], [iconclass], [esfinal], [esexitoso], [espendiente], [estado]) VALUES (1, 'chargeback_pending', 'DISPUTA', 'Contracargo en Proceso', '#fd7e14', 'fa-exclamation-triangle', 'N', 'N', 'N', 'S');
+INSERT INTO [PasarelaEstado] ([idpasarela], [codestadoext], [codestadoint], [desestado], [colorhex], [iconclass], [esfinal], [esexitoso], [espendiente], [estado]) VALUES (1, 'chargeback_accepted', 'PERDIDA', 'Contracargo Perdido', '#000000', 'fa-thumbs-down', 'S', 'N', 'N', 'S');
+INSERT INTO [PasarelaEstado] ([idpasarela], [codestadoext], [codestadoint], [desestado], [colorhex], [iconclass], [esfinal], [esexitoso], [espendiente], [estado]) VALUES (1, 'chargeback_adjustment', 'GANADA', 'Contracargo Ganado', '#20c997', 'fa-thumbs-up', 'S', 'S', 'N', 'S');
+GO
+ 
+-- 4. PASARELA MARCA TARJETA
+-- ============================================================================
+INSERT INTO [PasarelaMarcaTarjeta] ([idpasarela], [codmarcaext], [desmarca], [urllogo], [colorfondo], [estado]) VALUES (1, 'visa', 'Visa', '', '#1A1F71', 'S');
+INSERT INTO [PasarelaMarcaTarjeta] ([idpasarela], [codmarcaext], [desmarca], [urllogo], [colorfondo], [estado]) VALUES (1, 'mastercard', 'Mastercard', '', '#EB001B', 'S');
+INSERT INTO [PasarelaMarcaTarjeta] ([idpasarela], [codmarcaext], [desmarca], [urllogo], [colorfondo], [estado]) VALUES (1, 'american_express', 'American Express', '', '#006FCF', 'S');
+INSERT INTO [PasarelaMarcaTarjeta] ([idpasarela], [codmarcaext], [desmarca], [urllogo], [colorfondo], [estado]) VALUES (1, 'diners_club', 'Diners Club', '', '#004080', 'S');
+GO
+ 
+-- 5. PASARELA HOMOLOGACION ERROR (Mensajes amigables)
+-- ============================================================================
+
+INSERT INTO PasarelaHomologacionError ([idpasarela], [coderrorext], [deserrorext], [coderrorint], [categoriaerror], [msgusuario], [msgusuariodetalle], [accionsugerida], [permitereintento], [maxreintentos], [colorhex], [iconclass], [severidad], [notificaradmin], [estado])
+	VALUES (1, '3001', 'La tarjeta fue rechazada por fondos insuficientes', 'FONDOS_INSUF', 'TARJETA', 'Tu tarjeta no tiene fondos suficientes', 'Por favor recarga tu tarjeta o intenta con una diferente.', 'CAMBIAR_TARJETA', 'S', 3, '#dc3545', 'fa-wallet', 'MEDIA', 'N', 'S');
+INSERT INTO PasarelaHomologacionError ([idpasarela], [coderrorext], [deserrorext], [coderrorint], [categoriaerror], [msgusuario], [msgusuariodetalle], [accionsugerida], [permitereintento], [maxreintentos], [colorhex], [iconclass], [severidad], [notificaradmin], [estado])
+	VALUES (1, '3002', 'La tarjeta ha expirado', 'TARJETA_EXPIRADA', 'TARJETA', 'Tu tarjeta ha expirado', 'Verifica la fecha de vencimiento o intenta con otra tarjeta.', 'CAMBIAR_TARJETA', 'S', 3, '#dc3545', 'fa-calendar-times', 'MEDIA', 'N', 'S');
+INSERT INTO PasarelaHomologacionError ([idpasarela], [coderrorext], [deserrorext], [coderrorint], [categoriaerror], [msgusuario], [msgusuariodetalle], [accionsugerida], [permitereintento], [maxreintentos], [colorhex], [iconclass], [severidad], [notificaradmin], [estado])
+	VALUES (1, '3003', 'La tarjeta fue declinada por el banco', 'TARJETA_DECLINADA', 'BANCO', 'Tu banco rechazó la transacción', 'El banco no autorizó el pago. Llama a tu banco para autorizar compras por internet o intenta con otra tarjeta.', 'CONTACTAR_BANCO', 'S', 3, '#dc3545', 'fa-ban', 'MEDIA', 'N', 'S');
+INSERT INTO PasarelaHomologacionError ([idpasarela], [coderrorext], [deserrorext], [coderrorint], [categoriaerror], [msgusuario], [msgusuariodetalle], [accionsugerida], [permitereintento], [maxreintentos], [colorhex], [iconclass], [severidad], [notificaradmin], [estado])
+	VALUES (1, '3004', 'La tarjeta ha sido reportada como robada', 'TARJETA_ROBADA', 'FRAUDE', 'Transacción rechazada por seguridad', 'Esta tarjeta tiene un reporte de restricción. Por favor contacta a tu banco.', 'CONTACTAR_BANCO', 'N', 0, '#000000', 'fa-shield-alt', 'ALTA', 'S', 'S');
+INSERT INTO PasarelaHomologacionError ([idpasarela], [coderrorext], [deserrorext], [coderrorint], [categoriaerror], [msgusuario], [msgusuariodetalle], [accionsugerida], [permitereintento], [maxreintentos], [colorhex], [iconclass], [severidad], [notificaradmin], [estado])
+	VALUES (1, '3005', 'Rechazada por sistema antifraude', 'FRAUDE_DETECTADO', 'FRAUDE', 'No pudimos procesar tu pago por seguridad', 'Nuestro sistema de seguridad ha detectado una anomalía. Intenta con otro medio de pago.', 'CAMBIAR_TARJETA', 'N', 0, '#000000', 'fa-user-secret', 'ALTA', 'S', 'S');
+INSERT INTO PasarelaHomologacionError ([idpasarela], [coderrorext], [deserrorext], [coderrorint], [categoriaerror], [msgusuario], [msgusuariodetalle], [accionsugerida], [permitereintento], [maxreintentos], [colorhex], [iconclass], [severidad], [notificaradmin], [estado])
+	VALUES (1, '2004', 'El dígito de verificación de la tarjeta es inválido', 'CVV_INVALIDO', 'USUARIO', 'El código de seguridad (CVV) es incorrecto', 'Es el código de 3 o 4 dígitos al reverso de tu tarjeta. Verifícalo e intenta de nuevo.', 'VERIFICAR_DATOS', 'S', 5, '#ffc107', 'fa-keyboard', 'BAJA', 'N', 'S');
+INSERT INTO PasarelaHomologacionError ([idpasarela], [coderrorext], [deserrorext], [coderrorint], [categoriaerror], [msgusuario], [msgusuariodetalle], [accionsugerida], [permitereintento], [maxreintentos], [colorhex], [iconclass], [severidad], [notificaradmin], [estado])
+	VALUES (1, '2005', 'La fecha de expiración de la tarjeta es anterior a la fecha actual', 'FECHA_INVALIDA', 'USUARIO', 'La fecha de expiración es incorrecta', 'Asegúrate de ingresar el mes y año tal cual aparecen en el plástico.', 'VERIFICAR_DATOS', 'S', 5, '#ffc107', 'fa-calendar', 'BAJA', 'N', 'S');
+INSERT INTO PasarelaHomologacionError ([idpasarela], [coderrorext], [deserrorext], [coderrorint], [categoriaerror], [msgusuario], [msgusuariodetalle], [accionsugerida], [permitereintento], [maxreintentos], [colorhex], [iconclass], [severidad], [notificaradmin], [estado])
+	VALUES (1, '2006', 'El código de seguridad de la tarjeta (CVV2) es requerido', 'CVV_FALTANTE', 'USUARIO', 'Falta el código de seguridad', 'Por favor ingresa el CVV de tu tarjeta.', 'VERIFICAR_DATOS', 'S', 5, '#ffc107', 'fa-exclamation', 'BAJA', 'N', 'S');
+INSERT INTO PasarelaHomologacionError ([idpasarela], [coderrorext], [deserrorext], [coderrorint], [categoriaerror], [msgusuario], [msgusuariodetalle], [accionsugerida], [permitereintento], [maxreintentos], [colorhex], [iconclass], [severidad], [notificaradmin], [estado])
+	VALUES (1, '1000', 'Ocurrió un error interno en el servidor de Openpay', 'ERROR_PASARELA', 'SISTEMA', 'Hubo un problema de comunicación', 'Estamos teniendo problemas para conectar con el procesador de pagos. Por favor espera unos minutos e intenta nuevamente.', 'REINTENTAR', 'S', 3, '#6c757d', 'fa-server', 'ALTA', 'S', 'S');
+INSERT INTO PasarelaHomologacionError ([idpasarela], [coderrorext], [deserrorext], [coderrorint], [categoriaerror], [msgusuario], [msgusuariodetalle], [accionsugerida], [permitereintento], [maxreintentos], [colorhex], [iconclass], [severidad], [notificaradmin], [estado])
+	VALUES (1, '1001', 'El formato de la petición no es JSON', 'ERROR_FORMATO', 'SISTEMA', 'Error técnico al procesar el pago', 'Por favor intenta nuevamente. Si el problema persiste, contacta a soporte.', 'REINTENTAR', 'S', 3, '#6c757d', 'fa-bug', 'MEDIA', 'N', 'S');  
+ GO
+-- 6. PASARELA CONFIG REINTENTO
+-- ============================================================================
+INSERT INTO [PasarelaConfigReintento] ([idpasarela], [numintento], [diasespera], [enviarnotificacion], [tiponotificacion], [estado]) VALUES (1, 1, 1, 'S', 'EMAIL', 'S');
+INSERT INTO [PasarelaConfigReintento] ([idpasarela], [numintento], [diasespera], [enviarnotificacion], [tiponotificacion], [estado]) VALUES (1, 2, 3, 'S', 'EMAIL', 'S');
+INSERT INTO [PasarelaConfigReintento] ([idpasarela], [numintento], [diasespera], [enviarnotificacion], [tiponotificacion], [estado]) VALUES (1, 3, 7, 'S', 'WHATSAPP', 'S');
+INSERT INTO [PasarelaConfigReintento] ([idpasarela], [numintento], [diasespera], [enviarnotificacion], [tiponotificacion], [estado]) VALUES (1, 4, 10, 'S', 'EMAIL', 'S');
+INSERT INTO [PasarelaConfigReintento] ([idpasarela], [numintento], [diasespera], [enviarnotificacion], [tiponotificacion], [estado]) VALUES (1, 1, 1, 'S', 'EMAIL', 'S');
+GO
+ 
+-- ============================================================================
+-- FIN DEL SCRIPT
+-- ============================================================================
+

@@ -14,7 +14,6 @@ router.get('/api/me', controllerauth.getMe);
 
 // Procesar formularios
 router.post('/login', isNotLoggedIn, controllerauth.postLogin);
-router.post('/registro', isNotLoggedIn, controllerauth.postRegistro);
 router.post('/recuperar', isNotLoggedIn, controllerauth.postRecuperar);
 
 // Cerrar sesión

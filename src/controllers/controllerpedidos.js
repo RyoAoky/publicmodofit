@@ -14,7 +14,7 @@ module.exports = {
     async getProductos(req, res) {
         try {
             const productos = await sequelize.query(
-                `SELECT * FROM Producto WHERE estpro = 'A' ORDER BY nompro`,
+                `SELECT * FROM Producto WHERE estpro = 'S' ORDER BY nompro`,
                 { type: QueryTypes.SELECT }
             );
 
@@ -67,7 +67,8 @@ module.exports = {
     async postProcesarPago(req, res) {
         try {
             const { token_id, device_session_id, items, datosCliente, total } = req.body;
-            const idCliente = req.user ? req.user.idcli : null;
+            const dniusu = req.user ? req.user.dniusu : null;
+            const idusu = req.user ? req.user.idusu : null;
 
             // Usar el servicio de OpenPay para crear el cargo
             const resultadoCargo = await openpayService.crearCargo({
@@ -84,54 +85,75 @@ module.exports = {
             });
 
             if (!resultadoCargo.success) {
-                return res.json({ 
-                    success: false, 
+                return res.json({
+                    success: false,
                     message: resultadoCargo.error || 'Error al procesar el pago'
                 });
             }
 
             if (resultadoCargo.cargo.status === 'completed') {
-                // Pago exitoso - crear pedido
-                const resultPedido = await sequelize.query(
-                    `INSERT INTO Pedido (idcli, totped, metpagped, estped, fecped, refpago) 
-                     OUTPUT INSERTED.idped
-                     VALUES (:idCliente, :total, 'TARJETA', 'C', GETDATE(), :refPago)`,
+                // Obtener caja virtual
+                const cajaResult = await openpayService.obtenerOCrearCajaVirtual();
+                const idcaja = cajaResult.cajaVirtual?.idcaja || null;
+
+                // Pago exitoso - crear venta (reemplaza Pedido)
+                const resultVenta = await sequelize.query(
+                    `INSERT INTO Venta (dniusu, totalven, subtotalven, cantpagven, codtipopago, estven, feccre, idcaja, idusuven, origenventa) 
+                     OUTPUT INSERTED.idven
+                     VALUES (:dniusu, :total, :total, :total, 'TR', 'S', GETDATE(), :idcaja, :idusu, 'W')`,
                     {
-                        replacements: { 
-                            idCliente, 
-                            total, 
-                            refPago: resultadoCargo.cargo.id
+                        replacements: {
+                            dniusu,
+                            total,
+                            idcaja,
+                            idusu
                         },
                         type: QueryTypes.INSERT
                     }
                 );
 
-                const idPedido = resultPedido[0]?.idped;
+                const idVenta = resultVenta[0]?.idven;
 
-                // Insertar items del pedido
+                // Registrar pago en VentaPagos
+                await sequelize.query(
+                    `INSERT INTO VentaPagos (idven, codtipopago, monto, feccre, cambio) 
+                     VALUES (:idVenta, 'TR', :total, GETDATE(), 0)`,
+                    {
+                        replacements: {
+                            idVenta,
+                            total
+                        },
+                        type: QueryTypes.INSERT
+                    }
+                );
+
+                // Insertar items de la venta (reemplaza DetallePedido)
                 for (const item of items) {
                     await sequelize.query(
-                        `INSERT INTO DetallePedido (idped, idpro, cantdp, predp) 
-                         VALUES (:idPedido, :idProducto, :cantidad, :precio)`,
+                        `INSERT INTO VentaDetalle (idven, barcpro, cantvendet, subtotal, feccre, idusuven, cospro) 
+                         SELECT :idVenta, barcpro, :cantidad, :subtotal, GETDATE(), :idusu, cosvenpro
+                         FROM Producto WHERE idpro = :idProducto`,
                         {
-                            replacements: { 
-                                idPedido, 
-                                idProducto: item.id, 
-                                cantidad: item.cantidad, 
-                                precio: item.precio 
+                            replacements: {
+                                idVenta,
+                                idProducto: item.id,
+                                cantidad: item.cantidad,
+                                subtotal: item.precio * item.cantidad,
+                                idusu
                             },
                             type: QueryTypes.INSERT
                         }
                     );
                 }
 
-                // Registrar pago en tabla de transacciones
+                // Registrar pago en tabla de transacciones (Opcional: migrar a PasarelaTransaccion si es necesario)
+                /*
                 await sequelize.query(
                     `INSERT INTO PagoOpenPay (idped, transaction_id, authorization, amount, status, fecpago)
                      VALUES (:idPedido, :transactionId, :authorization, :amount, :status, GETDATE())`,
                     {
                         replacements: {
-                            idPedido,
+                            idPedido: idVenta, // Usar idVenta si la tabla fue actualizada
                             transactionId: resultadoCargo.cargo.id,
                             authorization: resultadoCargo.cargo.authorization,
                             amount: total,
@@ -140,26 +162,27 @@ module.exports = {
                         type: QueryTypes.INSERT
                     }
                 );
+                */
 
-                res.json({ 
-                    success: true, 
+                res.json({
+                    success: true,
                     message: 'Pago procesado correctamente',
                     data: {
-                        idPedido,
+                        idPedido: idVenta,
                         authorization: resultadoCargo.cargo.authorization
                     }
                 });
             } else {
-                res.json({ 
-                    success: false, 
-                    message: 'El pago no pudo ser procesado' 
+                res.json({
+                    success: false,
+                    message: 'El pago no pudo ser procesado'
                 });
             }
         } catch (error) {
             console.error('Error al procesar pago:', error.response?.data || error);
-            res.json({ 
-                success: false, 
-                message: error.response?.data?.description || 'Error al procesar el pago' 
+            res.json({
+                success: false,
+                message: error.response?.data?.description || 'Error al procesar el pago'
             });
         }
     },
@@ -182,8 +205,8 @@ module.exports = {
                 }
             );
 
-            res.json({ 
-                success: true, 
+            res.json({
+                success: true,
                 data: {
                     status: openpayResponse.data.status,
                     amount: openpayResponse.data.amount,
@@ -220,11 +243,69 @@ module.exports = {
         }
     },
 
-    // =========================================================================
-    // PROCESAR SUSCRIPCIÓN COMPLETA (OpenPay)
-    // Delegado a controllersql para mejor organización
-    // =========================================================================
-    postProcesarSuscripcion: controllersql.procesarSuscripcionCompleta,
+    // postProcesarSuscripcion delega al flujo completo de controllersql
+    async postProcesarSuscripcion(req, res) {
+        try {
+            const {
+                datosCliente,
+                tokenTarjeta,
+                deviceSessionId,
+                planId,
+                idplanpas,
+                montoPlan,
+                barcpro
+            } = req.body;
+
+            // Validar datos requeridos
+            if (!datosCliente || !datosCliente.numeroDocumento) {
+                return res.json({
+                    success: false,
+                    mensaje: 'Se requiere el número de documento'
+                });
+            }
+
+            if (!tokenTarjeta) {
+                return res.json({
+                    success: false,
+                    mensaje: 'Debe tokenizar la tarjeta primero'
+                });
+            }
+
+            if (!planId) {
+                return res.json({
+                    success: false,
+                    mensaje: 'Debe seleccionar un plan de suscripción'
+                });
+            }
+
+            // Crear contexto de auditoría
+            const auditContext = {
+                ipaddress: req.ip || req.connection?.remoteAddress,
+                useragent: req.headers['user-agent']
+            };
+
+            // Ejecutar flujo completo
+            const resultado = await controllersql.procesarPagoCompleto({
+                datosCliente,
+                tokenTarjeta,
+                deviceSessionId,
+                planId,
+                idplanpas,
+                montoPlan,
+                barcpro
+            }, auditContext);
+
+            return res.json(resultado);
+
+        } catch (error) {
+            console.error('[postProcesarSuscripcion] Error:', error.message);
+            return res.json({
+                success: false,
+                mensaje: 'Error al procesar la suscripción',
+                error: error.message
+            });
+        }
+    },
 
     // =========================================================================
     // ENDPOINTS ADICIONALES
@@ -234,8 +315,27 @@ module.exports = {
     async getVerificarMembresia(req, res) {
         try {
             const { dni } = req.params;
-            const resultado = await controllersql.verificarMembresiaActiva(dni);
-            res.json({ success: true, data: resultado });
+
+            // Buscar membresía activa
+            const resultado = await sequelize.query(
+                `SELECT TOP 1 m.idmem, m.fecinimem, m.fecfinmem, m.diasmem, m.estamem,
+                        p.nompro, u.nomusu, u.apellusu
+                 FROM Membresia m
+                 INNER JOIN Producto p ON m.barcpro = p.barcpro
+                 INNER JOIN usuario u ON m.idusumem = u.idusu
+                 WHERE m.dniusutit = :dni AND m.estamem = 'S'
+                 ORDER BY m.fecfinmem DESC`,
+                {
+                    replacements: { dni },
+                    type: QueryTypes.SELECT
+                }
+            );
+
+            res.json({
+                success: true,
+                tieneMembresiaActiva: resultado.length > 0,
+                data: resultado[0] || null
+            });
         } catch (error) {
             console.error('Error al verificar membresía:', error);
             res.json({ success: false, message: 'Error al verificar membresía' });
@@ -246,7 +346,22 @@ module.exports = {
     async getHistorialSuscripciones(req, res) {
         try {
             const { dni } = req.params;
-            const historial = await controllersql.obtenerHistorialSuscripciones(dni);
+
+            const historial = await sequelize.query(
+                `SELECT ps.idsuscpas, ps.idsuscext, ps.fecinicio, ps.fecproximocobro,
+                        ps.estsuscripcion, pp.nomplanext, pp.precio,
+                        pc.idcliext
+                 FROM PasarelaSuscripcion ps
+                 INNER JOIN PasarelaCliente pc ON ps.idclipas = pc.idclipas
+                 INNER JOIN PasarelaPlan pp ON ps.idplanpas = pp.idplanpas
+                 WHERE pc.dniusu = :dni
+                 ORDER BY ps.fecinicio DESC`,
+                {
+                    replacements: { dni },
+                    type: QueryTypes.SELECT
+                }
+            );
+
             res.json({ success: true, data: historial });
         } catch (error) {
             console.error('Error al obtener historial:', error);
@@ -257,8 +372,18 @@ module.exports = {
     // Health check del servicio OpenPay
     async getHealthCheck(req, res) {
         try {
-            const health = await controllersql.healthCheck();
-            res.json({ success: true, data: health });
+            await openpayService.ensureInitialized();
+            const config = openpayService.config;
+
+            res.json({
+                success: true,
+                data: {
+                    status: 'OK',
+                    pasarela: config?.nompasarela || 'OpenPay',
+                    ambiente: config?.ambiente || 'SANDBOX',
+                    timestamp: new Date().toISOString()
+                }
+            });
         } catch (error) {
             console.error('Error en health check:', error);
             res.json({ success: false, message: 'Error al verificar estado del servicio' });
@@ -269,8 +394,23 @@ module.exports = {
     async postValidarDocumento(req, res) {
         try {
             const { tipoDocumento, numeroDocumento } = req.body;
-            const validacion = controllersql.validarDocumento(tipoDocumento, numeroDocumento);
-            res.json({ success: validacion.valido, message: validacion.mensaje || 'Documento válido' });
+
+            // Validación básica de documento
+            let valido = false;
+            let mensaje = '';
+
+            if (!numeroDocumento) {
+                mensaje = 'Número de documento requerido';
+            } else if (tipoDocumento === 'DNI' && !/^\d{8}$/.test(numeroDocumento)) {
+                mensaje = 'DNI debe tener 8 dígitos';
+            } else if (tipoDocumento === 'CE' && !/^\d{9,12}$/.test(numeroDocumento)) {
+                mensaje = 'Carnet de extranjería debe tener entre 9 y 12 dígitos';
+            } else {
+                valido = true;
+                mensaje = 'Documento válido';
+            }
+
+            res.json({ success: valido, message: mensaje });
         } catch (error) {
             console.error('Error al validar documento:', error);
             res.json({ success: false, message: 'Error al validar documento' });

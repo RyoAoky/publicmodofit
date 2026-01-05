@@ -40,13 +40,13 @@ async function cargarPedidos() {
                         <tbody>
                             ${data.data.map(p => `
                                 <tr>
-                                    <td><strong>#${p.idped}</strong></td>
-                                    <td>${formatearFecha(p.fecped)}</td>
-                                    <td>S/ ${parseFloat(p.totped).toFixed(2)}</td>
-                                    <td>${p.metpagped || 'TARJETA'}</td>
-                                    <td>${getEstadoPedido(p.estped)}</td>
+                                    <td><strong>#${p.idven}</strong></td>
+                                    <td>${formatearFecha(p.feccre)}</td>
+                                    <td>S/ ${parseFloat(p.totalven).toFixed(2)}</td>
+                                    <td>${p.destipopago || p.codtipopago || 'TARJETA'}</td>
+                                    <td>${getEstadoPedido(p.estven)}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="verDetalle(${p.idped})">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="verDetalle(${p.idven})">
                                             <i class="bi bi-eye"></i>
                                         </button>
                                     </td>
@@ -76,7 +76,8 @@ async function cargarPedidos() {
 function getEstadoPedido(estado) {
     switch(estado) {
         case 'P': return '<span class="badge bg-warning">Pendiente</span>';
-        case 'C': return '<span class="badge bg-success">Completado</span>';
+        case 'C': 
+        case 'S': return '<span class="badge bg-success">Completado</span>';
         case 'X': return '<span class="badge bg-danger">Cancelado</span>';
         default: return '<span class="badge bg-secondary">-</span>';
     }
@@ -93,7 +94,7 @@ async function verDetalle(idPedido) {
         const data = await response.json();
         
         if (data.success && data.data.length > 0) {
-            const items = data.data.map(d => `<li>${d.nompro} x${d.cantdp} - S/ ${parseFloat(d.predp).toFixed(2)}</li>`).join('');
+            const items = data.data.map(d => `<li>${d.nompro} x${d.cantvendet || 1} - S/ ${parseFloat(d.subtotal || 0).toFixed(2)}</li>`).join('');
             Swal.fire({
                 title: 'Detalle del Pedido #' + idPedido,
                 html: `<ul class="text-start">${items}</ul>`,

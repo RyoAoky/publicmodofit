@@ -10,26 +10,26 @@ const SECURITY_CONFIG = {
     // Límites de montos (PEN)
     MIN_AMOUNT: 1.00,
     MAX_AMOUNT: 50000.00,
-    
+
     // Rate limiting (peticiones por minuto)
     RATE_LIMIT_WINDOW_MS: 60000,
     RATE_LIMIT_MAX_REQUESTS: 30,
-    
+
     // Retry configuration
     MAX_RETRIES: 3,
     RETRY_DELAY_MS: 1000,
     RETRY_BACKOFF_MULTIPLIER: 2,
-    
+
     // Timeouts
     REQUEST_TIMEOUT_MS: 30000,
-    
+
     // TTL de configuración
     CONFIG_TTL_MS: 3600000, // 1 hora
-    
+
     // Valores permitidos
     ALLOWED_REPEAT_UNITS: ['day', 'week', 'month', 'year'],
     ALLOWED_CURRENCIES: ['PEN', 'USD'],
-    
+
     // Longitudes máximas para sanitización
     MAX_NAME_LENGTH: 100,
     MAX_PLAN_ID_LENGTH: 50,
@@ -56,19 +56,19 @@ function sanitizeString(str, maxLength = 100) {
  */
 function validateAmount(amount) {
     const numAmount = parseFloat(amount);
-    
+
     if (isNaN(numAmount)) {
         throw new Error('El monto debe ser un número válido');
     }
-    
+
     if (numAmount < SECURITY_CONFIG.MIN_AMOUNT) {
         throw new Error(`El monto mínimo es ${SECURITY_CONFIG.MIN_AMOUNT}`);
     }
-    
+
     if (numAmount > SECURITY_CONFIG.MAX_AMOUNT) {
         throw new Error(`El monto máximo es ${SECURITY_CONFIG.MAX_AMOUNT}`);
     }
-    
+
     return Math.round(numAmount * 100) / 100;
 }
 
@@ -98,23 +98,23 @@ function maskSensitiveData(data, depth = 0) {
     if (depth > 10) return '[MAX_DEPTH]';
     if (!data) return data;
     if (typeof data !== 'object') return data;
-    
+
     if (Array.isArray(data)) {
         return data.map(item => maskSensitiveData(item, depth + 1));
     }
-    
+
     const masked = {};
     const sensitiveFields = [
         'privatekey', 'publickey', 'password', 'token', 'secret', 'api_key',
         'card_number', 'cvv', 'cvv2', 'cvc', 'expiration', 'pin',
         'account_number', 'routing_number', 'ssn', 'dni'
     ];
-    
+
     const cardPattern = /^\d{13,19}$/;
-    
+
     for (const [key, value] of Object.entries(data)) {
         const keyLower = key.toLowerCase();
-        
+
         if (sensitiveFields.some(field => keyLower.includes(field))) {
             if (typeof value === 'string' && value.length > 8) {
                 masked[key] = value.substring(0, 4) + '****' + value.slice(-4);
@@ -130,7 +130,7 @@ function maskSensitiveData(data, depth = 0) {
             masked[key] = value;
         }
     }
-    
+
     return masked;
 }
 
@@ -164,7 +164,7 @@ class AuditContext {
         this.useragent = options.useragent || null;
         this.sessionId = options.sessionId || null;
     }
-    
+
     static fromRequest(req) {
         return new AuditContext({
             idusu: req.user?.idusu || req.body?.idusu || null,
@@ -173,7 +173,7 @@ class AuditContext {
             sessionId: req.sessionID || null
         });
     }
-    
+
     toObject() {
         return {
             idusu: this.idusu,
@@ -194,11 +194,11 @@ class OpenPayService {
         this._initPromise = null;
         this._lastInitTime = null;
         this._configTTL = SECURITY_CONFIG.CONFIG_TTL_MS;
-        
+
         // Rate limiting
         this._requestCount = 0;
         this._rateLimitResetTime = Date.now();
-        
+
         // Cache de operaciones para idempotencia
         this._operationCache = new Map();
         this._operationCacheTTL = 300000; // 5 minutos
@@ -207,17 +207,17 @@ class OpenPayService {
     // ========================================================================
     // RATE LIMITING
     // ========================================================================
-    
+
     _checkRateLimit() {
         const now = Date.now();
-        
+
         if (now - this._rateLimitResetTime > SECURITY_CONFIG.RATE_LIMIT_WINDOW_MS) {
             this._requestCount = 0;
             this._rateLimitResetTime = now;
         }
-        
+
         this._requestCount++;
-        
+
         if (this._requestCount > SECURITY_CONFIG.RATE_LIMIT_MAX_REQUESTS) {
             throw new Error('Rate limit excedido. Intente nuevamente en un momento.');
         }
@@ -226,19 +226,19 @@ class OpenPayService {
     // ========================================================================
     // IDEMPOTENCIA
     // ========================================================================
-    
+
     _checkIdempotency(key) {
         this._cleanExpiredOperations();
         return this._operationCache.get(key);
     }
-    
+
     _registerOperation(key, result) {
         this._operationCache.set(key, {
             result,
             timestamp: Date.now()
         });
     }
-    
+
     _cleanExpiredOperations() {
         const now = Date.now();
         for (const [key, value] of this._operationCache.entries()) {
@@ -251,120 +251,36 @@ class OpenPayService {
     // ========================================================================
     // RETRY CON EXPONENTIAL BACKOFF
     // ========================================================================
-    
+
     async _executeWithRetry(operation, operationName) {
         let lastError;
-        
+
         for (let attempt = 1; attempt <= SECURITY_CONFIG.MAX_RETRIES; attempt++) {
             try {
                 return await operation();
             } catch (error) {
                 lastError = error;
-                
+
                 const status = error.response?.status;
                 if (status === 400 || status === 401 || status === 403 || status === 422) {
                     throw error;
                 }
-                
+
                 if (attempt < SECURITY_CONFIG.MAX_RETRIES) {
-                    const delay = SECURITY_CONFIG.RETRY_DELAY_MS * 
+                    const delay = SECURITY_CONFIG.RETRY_DELAY_MS *
                         Math.pow(SECURITY_CONFIG.RETRY_BACKOFF_MULTIPLIER, attempt - 1);
                     secureLogger.warn(`${operationName} - Intento ${attempt} fallido, reintentando en ${delay}ms`);
                     await new Promise(resolve => setTimeout(resolve, delay));
                 }
             }
         }
-        
+
         throw lastError;
     }
 
     // ========================================================================
     // LOGGING DE API Y AUDITORÍA
     // ========================================================================
-
-    /**
-     * Registrar petición API en PasarelaApiLog
-     * @param {Object} logData - Datos de la petición
-     * @returns {Promise<number|null>} - ID del log insertado
-     */
-    async _registrarApiLog(logData) {
-        try {
-            const {
-                metodohttp,
-                endpoint,
-                operacion,
-                bodyenviado,
-                httpstatuscode,
-                bodyrecibido,
-                tiemporespuestams,
-                esexitoso,
-                codigoerror,
-                mensajeerror,
-                idusu,
-                ipaddress,
-                useragent,
-                correlationid,
-                numerointento
-            } = logData;
-
-            // Log para debug
-            console.log('[ApiLog] Registrando:', { operacion, endpoint, esexitoso, httpstatuscode });
-
-            await sequelize.query(
-                `INSERT INTO PasarelaApiLog (
-                    idpasarela, metodohttp, endpoint, operacion,
-                    bodyenviado, httpstatuscode, bodyrecibido,
-                    fecinicio, fecfin, tiemporespuestams,
-                    esexitoso, codigoerror, mensajeerror,
-                    idusu, ipaddress, useragent, idempotencykey, correlationid, numerointento
-                ) VALUES (
-                    :idpasarela, :metodohttp, :endpoint, :operacion,
-                    :bodyenviado, :httpstatuscode, :bodyrecibido,
-                    GETDATE(), GETDATE(), :tiemporespuestams,
-                    :esexitoso, :codigoerror, :mensajeerror,
-                    :idusu, :ipaddress, :useragent, :idempotencykey, :correlationid, :numerointento
-                )`,
-                {
-                    replacements: {
-                        idpasarela: this.config?.idpasarela || 1,
-                        metodohttp: sanitizeString(metodohttp, 10),
-                        endpoint: sanitizeString(endpoint, 500),
-                        operacion: sanitizeString(operacion, 50),
-                        bodyenviado: bodyenviado ? JSON.stringify(maskSensitiveData(bodyenviado)) : null,
-                        httpstatuscode: httpstatuscode || null,
-                        bodyrecibido: bodyrecibido ? JSON.stringify(maskSensitiveData(bodyrecibido)) : null,
-                        tiemporespuestams: tiemporespuestams || 0,
-                        esexitoso: esexitoso ? 'S' : 'N',
-                        codigoerror: sanitizeString(codigoerror, 50) || null,
-                        mensajeerror: sanitizeString(mensajeerror, 500) || null,
-                        idusu: idusu || null,
-                        ipaddress: sanitizeString(ipaddress, 45) || null,
-                        useragent: sanitizeString(useragent, 500) || null,
-                        idempotencykey: sanitizeString(correlationid, 100),
-                        correlationid: sanitizeString(correlationid, 100),
-                        numerointento: numerointento || 1
-                    },
-                    type: QueryTypes.INSERT
-                }
-            );
-
-            // Obtener ID insertado
-            const result = await sequelize.query(
-                `SELECT TOP 1 idapilog FROM PasarelaApiLog ORDER BY idapilog DESC`,
-                { type: QueryTypes.SELECT }
-            );
-
-            console.log('[ApiLog] Registrado exitosamente, idapilog:', result[0]?.idapilog);
-            return result[0]?.idapilog || null;
-
-        } catch (error) {
-            // Log detallado del error
-            console.error('[ApiLog] ERROR al registrar:', error.message);
-            console.error('[ApiLog] Error completo:', error);
-            secureLogger.error('Error al registrar API log', error);
-            return null; // No lanzar error para no interrumpir el flujo principal
-        }
-    }
 
     /**
      * Registrar acción en PasarelaAuditoria
@@ -411,7 +327,130 @@ class OpenPayService {
     }
 
     /**
+     * Registrar INICIO de petición API en PasarelaApiLog (ANTES de llamar a OpenPay)
+     * @param {Object} logData - Datos de la petición
+     * @returns {Promise<number|null>} - ID del log insertado
+     */
+    async _registrarApiLogInicio(logData) {
+        try {
+            const {
+                metodohttp,
+                endpoint,
+                operacion,
+                bodyenviado,
+                idusu,
+                ipaddress,
+                useragent,
+                correlationid
+            } = logData;
+
+            console.log('[ApiLog] Registrando INICIO de petición:', { operacion, endpoint });
+
+            await sequelize.query(
+                `INSERT INTO PasarelaApiLog (
+                    idpasarela, metodohttp, endpoint, operacion,
+                    bodyenviado, fecinicio,
+                    esexitoso, idusu, ipaddress, useragent, 
+                    idempotencykey, correlationid, numerointento
+                ) VALUES (
+                    :idpasarela, :metodohttp, :endpoint, :operacion,
+                    :bodyenviado, GETDATE(),
+                    'N', :idusu, :ipaddress, :useragent, 
+                    :idempotencykey, :correlationid, 1
+                )`,
+                {
+                    replacements: {
+                        idpasarela: this.config?.idpasarela || 1,
+                        metodohttp: sanitizeString(metodohttp, 10),
+                        endpoint: sanitizeString(endpoint, 500),
+                        operacion: sanitizeString(operacion, 50),
+                        bodyenviado: bodyenviado ? JSON.stringify(maskSensitiveData(bodyenviado)) : null,
+                        idusu: idusu || null,
+                        ipaddress: sanitizeString(ipaddress, 45) || null,
+                        useragent: sanitizeString(useragent, 500) || null,
+                        idempotencykey: sanitizeString(correlationid, 100),
+                        correlationid: sanitizeString(correlationid, 100)
+                    },
+                    type: QueryTypes.INSERT
+                }
+            );
+
+            // Obtener ID insertado
+            const result = await sequelize.query(
+                `SELECT TOP 1 idapilog FROM PasarelaApiLog ORDER BY idapilog DESC`,
+                { type: QueryTypes.SELECT }
+            );
+
+            const idapilog = result[0]?.idapilog || null;
+            console.log('[ApiLog] INICIO registrado, idapilog:', idapilog);
+            return idapilog;
+
+        } catch (error) {
+            console.error('[ApiLog] ERROR al registrar inicio:', error.message);
+            return null;
+        }
+    }
+
+    /**
+     * Actualizar PasarelaApiLog con la respuesta (DESPUÉS de llamar a OpenPay)
+     * @param {number} idapilog - ID del registro a actualizar
+     * @param {Object} responseData - Datos de la respuesta
+     */
+    async _actualizarApiLogRespuesta(idapilog, responseData) {
+        if (!idapilog) return;
+
+        try {
+            const {
+                httpstatuscode,
+                bodyrecibido,
+                tiemporespuestams,
+                esexitoso,
+                codigoerror,
+                mensajeerror
+            } = responseData;
+
+            console.log('[ApiLog] Actualizando respuesta, idapilog:', idapilog, 'exitoso:', esexitoso);
+
+            await sequelize.query(
+                `UPDATE PasarelaApiLog SET
+                    httpstatuscode = :httpstatuscode,
+                    bodyrecibido = :bodyrecibido,
+                    fecfin = GETDATE(),
+                    tiemporespuestams = :tiemporespuestams,
+                    esexitoso = :esexitoso,
+                    codigoerror = :codigoerror,
+                    mensajeerror = :mensajeerror
+                 WHERE idapilog = :idapilog`,
+                {
+                    replacements: {
+                        idapilog,
+                        httpstatuscode: httpstatuscode || null,
+                        bodyrecibido: bodyrecibido ? JSON.stringify(maskSensitiveData(bodyrecibido)) : null,
+                        tiemporespuestams: tiemporespuestams || 0,
+                        esexitoso: esexitoso ? 'S' : 'N',
+                        codigoerror: sanitizeString(codigoerror, 50) || null,
+                        mensajeerror: sanitizeString(mensajeerror, 500) || null
+                    },
+                    type: QueryTypes.UPDATE
+                }
+            );
+
+            console.log('[ApiLog] Respuesta actualizada exitosamente');
+
+        } catch (error) {
+            console.error('[ApiLog] ERROR al actualizar respuesta:', error.message);
+        }
+    }
+
+    /**
      * Ejecutar operación API con logging automático
+     * FLUJO:
+     * 1. Registrar INICIO en PasarelaApiLog (obtener idapilog)
+     * 2. Llamar a OpenPay
+     * 3. Actualizar PasarelaApiLog con la respuesta
+     * 4. Registrar en PasarelaAuditoria
+     * 5. Retornar respuesta con idapilog
+     * 
      * @param {Function} operation - Función que ejecuta la llamada API
      * @param {Object} options - Opciones de logging
      * @returns {Object} - { response, idapilog }
@@ -427,38 +466,61 @@ class OpenPayService {
 
         const startTime = Date.now();
         const correlationid = generateIdempotencyKey({ operacion, timestamp: startTime });
-        
+
         let response = null;
-        let error = null;
-        let httpstatuscode = null;
-        let bodyrecibido = null;
         let idapilog = null;
 
-        try {
-            response = await this._executeWithRetry(operation, operacion);
-            httpstatuscode = response?.status || 200;
-            bodyrecibido = response?.data || response;
+        // ================================================================
+        // PASO 1: Registrar INICIO en PasarelaApiLog (ANTES de OpenPay)
+        // ================================================================
+        idapilog = await this._registrarApiLogInicio({
+            metodohttp,
+            endpoint,
+            operacion,
+            bodyenviado,
+            idusu: auditContext?.idusu,
+            ipaddress: auditContext?.ipaddress,
+            useragent: auditContext?.useragent,
+            correlationid
+        });
 
-            // Calcular tiempo de respuesta
+        try {
+            // ================================================================
+            // PASO 2: Llamar a OpenPay
+            // ================================================================
+            response = await this._executeWithRetry(operation, operacion);
+            const httpstatuscode = response?.status || 200;
+            const bodyrecibido = response?.data || response;
             const tiemporespuestams = Date.now() - startTime;
 
-            // Registrar log exitoso y obtener ID
-            idapilog = await this._registrarApiLog({
-                metodohttp,
-                endpoint,
-                operacion,
-                bodyenviado,
+            // ================================================================
+            // PASO 3: Actualizar PasarelaApiLog con la respuesta exitosa
+            // ================================================================
+            await this._actualizarApiLogRespuesta(idapilog, {
                 httpstatuscode,
                 bodyrecibido,
                 tiemporespuestams,
                 esexitoso: true,
                 codigoerror: null,
-                mensajeerror: null,
+                mensajeerror: null
+            });
+
+            // ================================================================
+            // PASO 4: Registrar en PasarelaAuditoria
+            // ================================================================
+            await this._registrarAuditoria({
+                tablaafectada: 'PasarelaApiLog',
+                idregistro: idapilog,
+                accion: 'API_CALL_SUCCESS',
+                camposcambiados: {
+                    operacion,
+                    endpoint,
+                    httpstatuscode,
+                    idexterno: bodyrecibido?.id || null
+                },
                 idusu: auditContext?.idusu,
                 ipaddress: auditContext?.ipaddress,
-                useragent: auditContext?.useragent,
-                correlationid,
-                numerointento: 1
+                useragent: auditContext?.useragent
             });
 
             // Agregar idapilog a la respuesta para trazabilidad
@@ -466,30 +528,38 @@ class OpenPayService {
             return response;
 
         } catch (err) {
-            error = err;
-            httpstatuscode = err.response?.status || 500;
-            bodyrecibido = err.response?.data || { error: err.message };
-
-            // Calcular tiempo de respuesta
+            const httpstatuscode = err.response?.status || 500;
+            const bodyrecibido = err.response?.data || { error: err.message };
             const tiemporespuestams = Date.now() - startTime;
 
-            // Registrar log de error
-            idapilog = await this._registrarApiLog({
-                metodohttp,
-                endpoint,
-                operacion,
-                bodyenviado,
+            // ================================================================
+            // PASO 3: Actualizar PasarelaApiLog con el error
+            // ================================================================
+            await this._actualizarApiLogRespuesta(idapilog, {
                 httpstatuscode,
                 bodyrecibido,
                 tiemporespuestams,
                 esexitoso: false,
                 codigoerror: err.response?.data?.error_code || err.code || 'ERROR',
-                mensajeerror: err.response?.data?.description || err.message,
+                mensajeerror: err.response?.data?.description || err.message
+            });
+
+            // ================================================================
+            // PASO 4: Registrar error en PasarelaAuditoria
+            // ================================================================
+            await this._registrarAuditoria({
+                tablaafectada: 'PasarelaApiLog',
+                idregistro: idapilog,
+                accion: 'API_CALL_ERROR',
+                camposcambiados: {
+                    operacion,
+                    endpoint,
+                    httpstatuscode,
+                    error: err.message
+                },
                 idusu: auditContext?.idusu,
                 ipaddress: auditContext?.ipaddress,
-                useragent: auditContext?.useragent,
-                correlationid,
-                numerointento: 1
+                useragent: auditContext?.useragent
             });
 
             // Agregar idapilog al error para trazabilidad
@@ -509,8 +579,8 @@ class OpenPayService {
         try {
             await this.ensureInitialized();
 
-            const sessionid = generateIdempotencyKey({ 
-                idusu: data.idusu, 
+            const sessionid = generateIdempotencyKey({
+                idusu: data.idusu,
                 timestamp: Date.now(),
                 random: Math.random()
             });
@@ -632,58 +702,103 @@ class OpenPayService {
 
     /**
      * Obtener o crear caja virtual del día
+     * NOTA: Ahora usa tabla Caja unificada con tipocaja='V'
      */
     async obtenerOCrearCajaVirtual() {
         try {
             await this.ensureInitialized();
+            const idpasarela = this.config.idpasarela;
+            const fechaHoy = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
-            // Buscar caja del día actual
+            // Buscar caja virtual del día actual en tabla Caja unificada
             let result = await sequelize.query(
-                `SELECT idcajavirtual, estcajavirtual, canttransacciones, 
-                        montbruto, montcomision, montimpuesto, montneto
-                 FROM CajaVirtual 
-                 WHERE idpasarela = :idpasarela 
-                   AND fecoperacion = CAST(GETDATE() AS DATE)`,
+                `SELECT c.idcaja, c.estcaja, c.fecoperacion,
+                        cdp.canttransacciones, cdp.montbruto, 
+                        cdp.montcomision, cdp.montiva, cdp.montneto
+                 FROM Caja c
+                 LEFT JOIN CajaDetallePasarela cdp ON c.idcaja = cdp.idcaja
+                 WHERE c.tipocaja = 'V'
+                   AND c.idpasarela = :idpasarela 
+                   AND c.fecoperacion = CAST(GETDATE() AS DATE)
+                   AND c.estcaja = 'S'`,
                 {
-                    replacements: { idpasarela: this.config.idpasarela },
+                    replacements: { idpasarela },
                     type: QueryTypes.SELECT
                 }
             );
 
             if (result.length > 0) {
-                return { success: true, cajaVirtual: result[0], nueva: false };
+                // Retornar con formato compatible (idcaja )
+                return {
+                    success: true,
+                    cajaVirtual: {
+                        idcaja: result[0].idcaja,
+                        idcajavirtual: result[0].idcaja, // Alias para compatibilidad
+                        ...result[0]
+                    },
+                    nueva: false
+                };
             }
 
-            // Crear nueva caja del día
+            // Cerrar cajas virtuales anteriores que quedaron abiertas
             await sequelize.query(
-                `INSERT INTO CajaVirtual (
-                    idpasarela, fecoperacion, apertura, estcajavirtual,
-                    canttransacciones, montbruto, montcomision, montimpuesto, montneto
+                `UPDATE Caja SET estcaja = 'C', cierre = GETDATE()
+                 WHERE tipocaja = 'V' AND idpasarela = :idpasarela 
+                   AND estcaja = 'S' AND fecoperacion < CAST(GETDATE() AS DATE)`,
+                {
+                    replacements: { idpasarela },
+                    type: QueryTypes.UPDATE
+                }
+            );
+
+            // Crear nueva caja virtual del día
+            await sequelize.query(
+                `INSERT INTO Caja (
+                    apertura, montinicaja, montfincaja, idusu,
+                    tipocaja, origenapertura, estcaja, fecoperacion, idpasarela
                 ) VALUES (
-                    :idpasarela, CAST(GETDATE() AS DATE), GETDATE(), 'S',
-                    0, 0.00, 0.00, 0.00, 0.00
+                    GETDATE(), 0, 0, 0,
+                    'V', 'S', 'S', CAST(GETDATE() AS DATE), :idpasarela
                 )`,
                 {
-                    replacements: { idpasarela: this.config.idpasarela },
+                    replacements: { idpasarela },
                     type: QueryTypes.INSERT
                 }
             );
 
             result = await sequelize.query(
-                `SELECT TOP 1 idcajavirtual FROM CajaVirtual 
-                 WHERE idpasarela = :idpasarela 
-                 ORDER BY idcajavirtual DESC`,
+                `SELECT TOP 1 idcaja FROM Caja 
+                 WHERE tipocaja = 'V' AND idpasarela = :idpasarela 
+                 ORDER BY idcaja DESC`,
                 {
-                    replacements: { idpasarela: this.config.idpasarela },
+                    replacements: { idpasarela },
                     type: QueryTypes.SELECT
                 }
             );
 
-            secureLogger.info('Caja virtual creada', { idcajavirtual: result[0]?.idcajavirtual });
-            return { 
-                success: true, 
-                cajaVirtual: { idcajavirtual: result[0]?.idcajavirtual },
-                nueva: true 
+            const idcaja = result[0]?.idcaja;
+
+            // Crear registro de extensión para detalles de pasarela
+            await sequelize.query(
+                `INSERT INTO CajaDetallePasarela (
+                    idcaja, idpasarela, canttransacciones, montbruto, montneto
+                ) VALUES (
+                    :idcaja, :idpasarela, 0, 0, 0
+                )`,
+                {
+                    replacements: { idcaja, idpasarela },
+                    type: QueryTypes.INSERT
+                }
+            );
+
+            secureLogger.info('Caja virtual creada (tabla Caja unificada)', { idcaja });
+            return {
+                success: true,
+                cajaVirtual: {
+                    idcaja,
+                    idcajavirtual: idcaja // Alias para compatibilidad
+                },
+                nueva: true
             };
 
         } catch (error) {
@@ -694,21 +809,37 @@ class OpenPayService {
 
     /**
      * Actualizar totales de caja virtual
+     * NOTA: Ahora actualiza tabla Caja + CajaDetallePasarela
+     * @param {number} idcaja - ID de la caja (puede venir como idcajavirtual por compatibilidad)
      */
-    async actualizarCajaVirtual(idcajavirtual, monto, comision = 0, impuesto = 0) {
+    async actualizarCajaVirtual(idcaja, monto, comision = 0, impuesto = 0) {
         try {
+            const neto = monto - comision - impuesto;
+
+            // Actualizar tabla Caja principal
             await sequelize.query(
-                `UPDATE CajaVirtual SET
+                `UPDATE Caja SET
+                    montfincaja = ISNULL(montfincaja, 0) + :monto
+                 WHERE idcaja = :idcaja`,
+                {
+                    replacements: { idcaja, monto },
+                    type: QueryTypes.UPDATE
+                }
+            );
+
+            // Actualizar tabla de extensión CajaDetallePasarela
+            await sequelize.query(
+                `UPDATE CajaDetallePasarela SET
                     canttransacciones = canttransacciones + 1,
+                    cantaprobadas = cantaprobadas + 1,
                     montbruto = montbruto + :monto,
                     montcomision = montcomision + :comision,
-                    montimpuesto = montimpuesto + :impuesto,
-                    montneto = montneto + (:monto - :comision - :impuesto),
-                    cierre = GETDATE(),
+                    montiva = montiva + :impuesto,
+                    montneto = montneto + :neto,
                     fecmov = GETDATE()
-                 WHERE idcajavirtual = :idcajavirtual`,
+                 WHERE idcaja = :idcaja`,
                 {
-                    replacements: { idcajavirtual, monto, comision, impuesto },
+                    replacements: { idcaja, monto, comision, impuesto, neto },
                     type: QueryTypes.UPDATE
                 }
             );
@@ -720,29 +851,7 @@ class OpenPayService {
         }
     }
 
-    /**
-     * Vincular caja virtual con caja física
-     */
-    async vincularCajaFisicaVirtual(idcaja, idcajavirtual, monttransferido, idusu) {
-        try {
-            await sequelize.query(
-                `INSERT INTO CajaCajaVirtual (
-                    idcaja, idcajavirtual, monttransferido, feccre, idusu
-                ) VALUES (
-                    :idcaja, :idcajavirtual, :monttransferido, GETDATE(), :idusu
-                )`,
-                {
-                    replacements: { idcaja, idcajavirtual, monttransferido, idusu },
-                    type: QueryTypes.INSERT
-                }
-            );
 
-            return { success: true };
-        } catch (error) {
-            secureLogger.error('Error al vincular cajas', error);
-            return { success: false };
-        }
-    }
 
     // ========================================================================
     // GESTIÓN DE TRANSACCIONES
@@ -764,7 +873,7 @@ class OpenPayService {
                 `SELECT TOP 1 idestadopas FROM PasarelaEstado 
                  WHERE idpasarela = :idpasarela AND codestadoext = :codestado`,
                 {
-                    replacements: { 
+                    replacements: {
                         idpasarela: this.config.idpasarela,
                         codestado: data.estadoext || 'in_progress'
                     },
@@ -847,7 +956,7 @@ class OpenPayService {
             // Actualizar caja virtual si el cobro fue exitoso
             if (data.estadoext === 'completed' || data.estadoext === 'charged') {
                 await this.actualizarCajaVirtual(
-                    idcajavirtual, 
+                    idcajavirtual,
                     montbruto,
                     montcomisionvar,
                     montimpuestocom
@@ -887,7 +996,7 @@ class OpenPayService {
                 `SELECT TOP 1 idestadopas FROM PasarelaEstado 
                  WHERE idpasarela = :idpasarela AND codestadoext = :codestado`,
                 {
-                    replacements: { 
+                    replacements: {
                         idpasarela: this.config.idpasarela,
                         codestado: nuevoEstado
                     },
@@ -924,9 +1033,9 @@ class OpenPayService {
 
     async ensureInitialized() {
         if (this.config && this.axiosInstance) {
-            const configExpired = this._lastInitTime && 
+            const configExpired = this._lastInitTime &&
                 (Date.now() - this._lastInitTime > this._configTTL);
-            
+
             if (!configExpired) {
                 return true;
             }
@@ -948,7 +1057,7 @@ class OpenPayService {
     async initialize() {
         try {
             secureLogger.info('Inicializando servicio OpenPay...');
-            
+
             const result = await sequelize.query(
                 `SELECT TOP 1 idpasarela, nompasarela, merchantid, privatekey, publickey, 
                         ambiente, moneda, estado, urlapibase
@@ -956,23 +1065,23 @@ class OpenPayService {
                  WHERE codpasarela = 'OPP' AND estado = 'S'`,
                 { type: QueryTypes.SELECT }
             );
-            
+
             if (result.length === 0) {
                 throw new Error('Configuración de pasarela OpenPay no encontrada o inactiva');
             }
 
             const configData = result[0];
-            
+
             if (!configData.merchantid || !configData.privatekey) {
                 throw new Error('Configuración de pasarela incompleta');
             }
 
             this.config = configData;
-            
-            const baseUrl = this.config.ambiente === 'PRODUCTION' 
+
+            const baseUrl = this.config.ambiente === 'PRODUCTION'
                 ? `https://api.openpay.pe/v1/${this.config.merchantid}`
                 : `https://sandbox-api.openpay.pe/v1/${this.config.merchantid}`;
-            
+
             this.axiosInstance = axios.create({
                 baseURL: baseUrl,
                 auth: {
@@ -992,7 +1101,7 @@ class OpenPayService {
             this._lastInitTime = Date.now();
             secureLogger.info(`Inicializado correctamente - Ambiente: ${this.config.ambiente}`);
             return true;
-            
+
         } catch (error) {
             secureLogger.error('Error al inicializar', error);
             this.config = null;
@@ -1022,51 +1131,51 @@ class OpenPayService {
         try {
             this._checkRateLimit();
             await this.ensureInitialized();
-            
+
             const validatedData = {
                 name: sanitizeString(clienteData.name, SECURITY_CONFIG.MAX_NAME_LENGTH),
                 email: clienteData.email?.trim().toLowerCase()
             };
-            
+
             if (!validatedData.name || validatedData.name.length < 2) {
                 throw new Error('El nombre del cliente debe tener al menos 2 caracteres');
             }
-            
+
             if (!validatedData.email || !validatedData.email.includes('@')) {
                 throw new Error('Se requiere un email válido');
             }
-            
+
             if (clienteData.last_name) {
                 validatedData.last_name = sanitizeString(clienteData.last_name, SECURITY_CONFIG.MAX_NAME_LENGTH);
             }
-            
+
             if (clienteData.phone_number) {
                 validatedData.phone_number = clienteData.phone_number.replace(/[^0-9]/g, '').substring(0, 15);
             }
-            
+
             if (clienteData.external_id) {
                 validatedData.external_id = sanitizeString(clienteData.external_id, 100);
             }
-            
+
             validatedData.requires_account = false;
-            
+
             const idempotencyKey = generateIdempotencyKey({
                 operation: 'CREATE_CUSTOMER',
                 email: validatedData.email,
                 external_id: validatedData.external_id
             });
-            
+
             const cachedResult = this._checkIdempotency(idempotencyKey);
             if (cachedResult) {
                 secureLogger.info('Retornando resultado cacheado (idempotencia) para crearCliente');
                 return cachedResult.result;
             }
-            
-            secureLogger.info('Creando cliente en OpenPay', { 
-                name: validatedData.name, 
-                external_id: validatedData.external_id 
+
+            secureLogger.info('Creando cliente en OpenPay', {
+                name: validatedData.name,
+                external_id: validatedData.external_id
             });
-            
+
             const response = await this._executeWithLogging(
                 () => this.axiosInstance.post('/customers', validatedData),
                 {
@@ -1077,7 +1186,7 @@ class OpenPayService {
                     auditContext
                 }
             );
-            
+
             if (response.data && response.data.id) {
                 const result = {
                     success: true,
@@ -1093,24 +1202,24 @@ class OpenPayService {
                     },
                     idapilog: response._idapilog // Agregar idapilog para trazabilidad
                 };
-                
+
                 this._registerOperation(idempotencyKey, result);
                 secureLogger.info('Cliente creado exitosamente', { clienteId: response.data.id, idapilog: response._idapilog });
                 return result;
             }
-            
+
             throw new Error('Respuesta inválida del servidor de pagos');
-            
+
         } catch (error) {
             secureLogger.error('Error al crear cliente', error);
-            
+
             let userMessage = 'Error al crear cliente en la pasarela de pagos';
             if (error.response?.data?.description) {
                 userMessage = error.response.data.description;
             } else if (error.message && !error.message.includes('internal')) {
                 userMessage = error.message;
             }
-            
+
             return {
                 success: false,
                 error: userMessage,
@@ -1126,14 +1235,14 @@ class OpenPayService {
         try {
             this._checkRateLimit();
             await this.ensureInitialized();
-            
+
             const sanitizedId = sanitizeString(customerId, 100);
             if (!sanitizedId || sanitizedId.length < 5) {
                 throw new Error('ID de cliente inválido');
             }
-            
+
             secureLogger.info('Obteniendo cliente', { customerId: sanitizedId });
-            
+
             const response = await this._executeWithLogging(
                 () => this.axiosInstance.get(`/customers/${sanitizedId}`),
                 {
@@ -1144,7 +1253,7 @@ class OpenPayService {
                     auditContext
                 }
             );
-            
+
             if (response.data && response.data.id) {
                 return {
                     success: true,
@@ -1161,12 +1270,12 @@ class OpenPayService {
                     idapilog: response._idapilog
                 };
             }
-            
+
             throw new Error('Respuesta inválida del servidor de pagos');
-            
+
         } catch (error) {
             secureLogger.error('Error al obtener cliente', error);
-            
+
             if (error.response?.status === 404) {
                 return {
                     success: false,
@@ -1174,7 +1283,7 @@ class OpenPayService {
                     code: 'NOT_FOUND'
                 };
             }
-            
+
             return {
                 success: false,
                 error: error.response?.data?.description || 'Error al obtener cliente',
@@ -1189,32 +1298,32 @@ class OpenPayService {
     async guardarClienteLocal(data) {
         try {
             await this.ensureInitialized();
-            
+
             const validatedIdusu = parseInt(data.idusu, 10);
             if (isNaN(validatedIdusu) || validatedIdusu < 1) {
                 throw new Error('ID de usuario inválido');
             }
-            
+
             const dniusu = sanitizeString(data.dniusu, 15);
             const idcliext = sanitizeString(data.idcliext, 100);
-            
+
             if (!idcliext) {
                 throw new Error('ID de cliente externo requerido');
             }
-            
+
             // Verificar si ya existe
             const checkResult = await sequelize.query(
                 `SELECT idclipas FROM PasarelaCliente 
                  WHERE idusu = :idusu AND idpasarela = :idpasarela AND estado = 'S'`,
                 {
-                    replacements: { 
-                        idusu: validatedIdusu, 
-                        idpasarela: this.config.idpasarela 
+                    replacements: {
+                        idusu: validatedIdusu,
+                        idpasarela: this.config.idpasarela
                     },
                     type: QueryTypes.SELECT
                 }
             );
-            
+
             if (checkResult.length > 0) {
                 // Actualizar existente
                 await sequelize.query(
@@ -1237,9 +1346,9 @@ class OpenPayService {
                         type: QueryTypes.UPDATE
                     }
                 );
-                
+
                 secureLogger.info('Cliente local actualizado', { idclipas: checkResult[0].idclipas, idapilog: data.idapilog });
-                
+
                 // Registrar auditoría
                 await this._registrarAuditoria({
                     tablaafectada: 'PasarelaCliente',
@@ -1248,7 +1357,7 @@ class OpenPayService {
                     camposcambiados: { idcliext, email: data.email, telefono: data.telefono, idapilog: data.idapilog },
                     idusu: validatedIdusu
                 });
-                
+
                 return { success: true, idclipas: checkResult[0].idclipas, updated: true };
             } else {
                 // Insertar nuevo
@@ -1273,23 +1382,23 @@ class OpenPayService {
                         type: QueryTypes.INSERT
                     }
                 );
-                
+
                 // Obtener ID insertado
                 const insertedCliente = await sequelize.query(
                     `SELECT TOP 1 idclipas FROM PasarelaCliente 
                      WHERE idusu = :idusu AND idpasarela = :idpasarela 
                      ORDER BY idclipas DESC`,
                     {
-                        replacements: { 
-                            idusu: validatedIdusu, 
-                            idpasarela: this.config.idpasarela 
+                        replacements: {
+                            idusu: validatedIdusu,
+                            idpasarela: this.config.idpasarela
                         },
                         type: QueryTypes.SELECT
                     }
                 );
-                
+
                 secureLogger.info('Cliente local insertado', { idclipas: insertedCliente[0]?.idclipas });
-                
+
                 // Registrar auditoría
                 await this._registrarAuditoria({
                     tablaafectada: 'PasarelaCliente',
@@ -1298,10 +1407,10 @@ class OpenPayService {
                     camposcambiados: { idusu: validatedIdusu, dniusu, idcliext, email: data.email },
                     idusu: validatedIdusu
                 });
-                
+
                 return { success: true, idclipas: insertedCliente[0]?.idclipas, inserted: true };
             }
-            
+
         } catch (error) {
             secureLogger.error('Error al guardar cliente local', error);
             return {
@@ -1317,12 +1426,12 @@ class OpenPayService {
     async obtenerClienteLocal(idusu) {
         try {
             await this.ensureInitialized();
-            
+
             const validatedIdusu = parseInt(idusu, 10);
             if (isNaN(validatedIdusu) || validatedIdusu < 1) {
                 return null;
             }
-            
+
             const result = await sequelize.query(
                 `SELECT pc.idclipas, pc.idpasarela, pc.idusu, pc.dniusu, 
                         pc.idcliext, pc.emailregistrado, pc.telefonoregistrado,
@@ -1330,16 +1439,16 @@ class OpenPayService {
                  FROM PasarelaCliente pc
                  WHERE pc.idusu = :idusu AND pc.idpasarela = :idpasarela AND pc.estado = 'S'`,
                 {
-                    replacements: { 
-                        idusu: validatedIdusu, 
-                        idpasarela: this.config.idpasarela 
+                    replacements: {
+                        idusu: validatedIdusu,
+                        idpasarela: this.config.idpasarela
                     },
                     type: QueryTypes.SELECT
                 }
             );
-            
+
             return result.length > 0 ? result[0] : null;
-            
+
         } catch (error) {
             secureLogger.error('Error al obtener cliente local', error);
             return null;
@@ -1352,10 +1461,10 @@ class OpenPayService {
     async obtenerClienteLocalPorDni(dniusu) {
         try {
             await this.ensureInitialized();
-            
+
             const dni = sanitizeString(dniusu, 15);
             if (!dni) return null;
-            
+
             const result = await sequelize.query(
                 `SELECT pc.idclipas, pc.idpasarela, pc.idusu, pc.dniusu, 
                         pc.idcliext, pc.emailregistrado, pc.telefonoregistrado,
@@ -1363,16 +1472,16 @@ class OpenPayService {
                  FROM PasarelaCliente pc
                  WHERE pc.dniusu = :dniusu AND pc.idpasarela = :idpasarela AND pc.estado = 'S'`,
                 {
-                    replacements: { 
-                        dniusu: dni, 
-                        idpasarela: this.config.idpasarela 
+                    replacements: {
+                        dniusu: dni,
+                        idpasarela: this.config.idpasarela
                     },
                     type: QueryTypes.SELECT
                 }
             );
-            
+
             return result.length > 0 ? result[0] : null;
-            
+
         } catch (error) {
             secureLogger.error('Error al obtener cliente local por DNI', error);
             return null;
@@ -1386,26 +1495,26 @@ class OpenPayService {
     /**
      * Asociar tarjeta tokenizada al cliente
      */
-    async asociarTarjeta(customerId, tokenId, deviceSessionId) {
+    async asociarTarjeta(customerId, tokenId, deviceSessionId, auditContext = {}) {
         try {
             this._checkRateLimit();
             await this.ensureInitialized();
-            
+
             const sanitizedCustomerId = sanitizeString(customerId, 100);
             const sanitizedTokenId = sanitizeString(tokenId, 100);
             const sanitizedDeviceSessionId = sanitizeString(deviceSessionId, 100);
-            
+
             if (!sanitizedCustomerId || !sanitizedTokenId || !sanitizedDeviceSessionId) {
                 throw new Error('Datos incompletos para asociar tarjeta');
             }
-            
+
             secureLogger.info('Asociando tarjeta a cliente', { customerId: sanitizedCustomerId });
-            
+
             const cardData = {
                 token_id: sanitizedTokenId,
                 device_session_id: sanitizedDeviceSessionId
             };
-            
+
             const response = await this._executeWithLogging(
                 () => this.axiosInstance.post(`/customers/${sanitizedCustomerId}/cards`, cardData),
                 {
@@ -1413,10 +1522,10 @@ class OpenPayService {
                     endpoint: `/customers/${sanitizedCustomerId}/cards`,
                     operacion: 'ASSOCIATE_CARD',
                     bodyenviado: cardData,
-                    auditContext: {}
+                    auditContext
                 }
             );
-            
+
             if (response.data && response.data.id) {
                 return {
                     success: true,
@@ -1434,16 +1543,17 @@ class OpenPayService {
                     idapilog: response._idapilog // Agregar idapilog para trazabilidad
                 };
             }
-            
+
             throw new Error('Respuesta inválida al asociar tarjeta');
-            
+
         } catch (error) {
             secureLogger.error('Error al asociar tarjeta', error);
-            
+
             return {
                 success: false,
                 error: error.response?.data?.description || 'Error al asociar tarjeta',
-                code: error.response?.data?.error_code || 'UNKNOWN_ERROR'
+                code: error.response?.data?.error_code || 'UNKNOWN_ERROR',
+                idapilog: error._idapilog
             };
         }
     }
@@ -1454,12 +1564,12 @@ class OpenPayService {
     async guardarTarjetaLocal(data) {
         try {
             await this.ensureInitialized();
-            
+
             const idclipas = parseInt(data.idclipas, 10);
             if (isNaN(idclipas) || idclipas < 1) {
                 throw new Error('ID de cliente pasarela inválido');
             }
-            
+
             await sequelize.query(
                 `INSERT INTO PasarelaTarjeta (
                     idclipas, sourceid, ultimos4, anioexp, mesexp, 
@@ -1483,7 +1593,7 @@ class OpenPayService {
                     type: QueryTypes.INSERT
                 }
             );
-            
+
             // Obtener ID insertado
             const insertedTarjeta = await sequelize.query(
                 `SELECT TOP 1 idtarjpas FROM PasarelaTarjeta 
@@ -1493,24 +1603,24 @@ class OpenPayService {
                     type: QueryTypes.SELECT
                 }
             );
-            
+
             secureLogger.info('Tarjeta local guardada', { idtarjpas: insertedTarjeta[0]?.idtarjpas, idapilog: data.idapilog });
-            
+
             // Registrar auditoría
             await this._registrarAuditoria({
                 tablaafectada: 'PasarelaTarjeta',
                 idregistro: insertedTarjeta[0]?.idtarjpas,
                 accion: 'INSERT',
-                camposcambiados: { 
-                    idclipas, 
-                    ultimos4: data.ultimos4, 
+                camposcambiados: {
+                    idclipas,
+                    ultimos4: data.ultimos4,
                     tipotarjeta: data.marca || data.tipotarjeta,
                     idapilog: data.idapilog
                 }
             });
-            
+
             return { success: true, idtarjpas: insertedTarjeta[0]?.idtarjpas };
-            
+
         } catch (error) {
             secureLogger.error('Error al guardar tarjeta local', error);
             return { success: false, error: 'Error al guardar tarjeta' };
@@ -1524,41 +1634,41 @@ class OpenPayService {
     /**
      * Crear suscripción en OpenPay
      */
-    async crearSuscripcion(customerId, planId, cardId) {
+    async crearSuscripcion(customerId, planId, cardId, auditContext = {}) {
         try {
             this._checkRateLimit();
             await this.ensureInitialized();
-            
+
             const sanitizedCustomerId = sanitizeString(customerId, 100);
             const sanitizedPlanId = sanitizeString(planId, 100);
             const sanitizedCardId = sanitizeString(cardId, 100);
-            
+
             if (!sanitizedCustomerId || !sanitizedPlanId) {
                 throw new Error('Datos incompletos para crear suscripción');
             }
-            
+
             const idempotencyKey = generateIdempotencyKey({
                 operation: 'CREATE_SUBSCRIPTION',
                 customerId: sanitizedCustomerId,
                 planId: sanitizedPlanId
             });
-            
+
             const cachedResult = this._checkIdempotency(idempotencyKey);
             if (cachedResult) {
                 secureLogger.info('Retornando resultado cacheado para crearSuscripcion');
                 return cachedResult.result;
             }
-            
+
             secureLogger.info('Creando suscripción', { customerId: sanitizedCustomerId, planId: sanitizedPlanId });
-            
+
             const subscriptionData = {
                 plan_id: sanitizedPlanId
             };
-            
+
             if (sanitizedCardId) {
                 subscriptionData.source_id = sanitizedCardId;
             }
-            
+
             const response = await this._executeWithLogging(
                 () => this.axiosInstance.post(`/customers/${sanitizedCustomerId}/subscriptions`, subscriptionData),
                 {
@@ -1566,10 +1676,10 @@ class OpenPayService {
                     endpoint: `/customers/${sanitizedCustomerId}/subscriptions`,
                     operacion: 'CREATE_SUBSCRIPTION',
                     bodyenviado: subscriptionData,
-                    auditContext: {}
+                    auditContext
                 }
             );
-            
+
             if (response.data && response.data.id) {
                 const result = {
                     success: true,
@@ -1587,21 +1697,22 @@ class OpenPayService {
                     },
                     idapilog: response._idapilog // Agregar idapilog para trazabilidad
                 };
-                
+
                 this._registerOperation(idempotencyKey, result);
                 secureLogger.info('Suscripción creada exitosamente', { subscriptionId: response.data.id, idapilog: response._idapilog });
                 return result;
             }
-            
+
             throw new Error('Respuesta inválida al crear suscripción');
-            
+
         } catch (error) {
             secureLogger.error('Error al crear suscripción', error);
-            
+
             return {
                 success: false,
                 error: error.response?.data?.description || 'Error al crear suscripción',
-                code: error.response?.data?.error_code || 'UNKNOWN_ERROR'
+                code: error.response?.data?.error_code || 'UNKNOWN_ERROR',
+                idapilog: error._idapilog
             };
         }
     }
@@ -1613,14 +1724,14 @@ class OpenPayService {
         try {
             this._checkRateLimit();
             await this.ensureInitialized();
-            
+
             const sanitizedCustomerId = sanitizeString(customerId, 100);
             const sanitizedSubscriptionId = sanitizeString(subscriptionId, 100);
-            
+
             if (!sanitizedCustomerId || !sanitizedSubscriptionId) {
                 throw new Error('IDs inválidos');
             }
-            
+
             const response = await this._executeWithLogging(
                 () => this.axiosInstance.get(`/customers/${sanitizedCustomerId}/subscriptions/${sanitizedSubscriptionId}`),
                 {
@@ -1631,23 +1742,23 @@ class OpenPayService {
                     auditContext: {}
                 }
             );
-            
+
             if (response.data && response.data.id) {
                 return {
                     success: true,
                     suscripcion: response.data
                 };
             }
-            
+
             throw new Error('Respuesta inválida');
-            
+
         } catch (error) {
             secureLogger.error('Error al obtener suscripción', error);
-            
+
             if (error.response?.status === 404) {
                 return { success: false, error: 'Suscripción no encontrada', code: 'NOT_FOUND' };
             }
-            
+
             return {
                 success: false,
                 error: error.response?.data?.description || 'Error al obtener suscripción',
@@ -1663,19 +1774,19 @@ class OpenPayService {
         try {
             this._checkRateLimit();
             await this.ensureInitialized();
-            
+
             const sanitizedCustomerId = sanitizeString(customerId, 100);
             const sanitizedSubscriptionId = sanitizeString(subscriptionId, 100);
-            
+
             if (!sanitizedCustomerId || !sanitizedSubscriptionId) {
                 throw new Error('IDs inválidos para cancelar suscripción');
             }
-            
-            secureLogger.info('Cancelando suscripción', { 
-                customerId: sanitizedCustomerId, 
-                subscriptionId: sanitizedSubscriptionId 
+
+            secureLogger.info('Cancelando suscripción', {
+                customerId: sanitizedCustomerId,
+                subscriptionId: sanitizedSubscriptionId
             });
-            
+
             await this._executeWithLogging(
                 () => this.axiosInstance.delete(`/customers/${sanitizedCustomerId}/subscriptions/${sanitizedSubscriptionId}`),
                 {
@@ -1686,13 +1797,13 @@ class OpenPayService {
                     auditContext: {}
                 }
             );
-            
+
             secureLogger.info('Suscripción cancelada');
             return { success: true };
-            
+
         } catch (error) {
             secureLogger.error('Error al cancelar suscripción', error);
-            
+
             return {
                 success: false,
                 error: error.response?.data?.description || 'Error al cancelar suscripción',
@@ -1707,15 +1818,15 @@ class OpenPayService {
     async guardarSuscripcionLocal(data) {
         try {
             await this.ensureInitialized();
-            
+
             const idclipas = parseInt(data.idclipas, 10);
             const idplanpas = parseInt(data.idplanpas, 10);
             const idtarjpas = data.idtarjpas ? parseInt(data.idtarjpas, 10) : null;
-            
+
             if (isNaN(idclipas) || idclipas < 1 || isNaN(idplanpas) || idplanpas < 1) {
                 throw new Error('IDs de cliente o plan inválidos');
             }
-            
+
             // Validar que idtarjpas no sea NULL (la tabla lo requiere)
             if (!idtarjpas) {
                 throw new Error('ID de tarjeta es requerido para guardar la suscripción');
@@ -1731,7 +1842,7 @@ class OpenPayService {
                     return null;
                 }
             };
-            
+
             await sequelize.query(
                 `INSERT INTO PasarelaSuscripcion (
                     idclipas, idplanpas, idtarjpas, idsuscext, estsuscripcion, 
@@ -1759,7 +1870,7 @@ class OpenPayService {
                     type: QueryTypes.INSERT
                 }
             );
-            
+
             // Obtener ID insertado
             const insertedSuscripcion = await sequelize.query(
                 `SELECT TOP 1 idsuscpas FROM PasarelaSuscripcion 
@@ -1769,27 +1880,27 @@ class OpenPayService {
                     type: QueryTypes.SELECT
                 }
             );
-            
+
             secureLogger.info('Suscripción local guardada', { idsuscpas: insertedSuscripcion[0]?.idsuscpas, idapilog: data.idapilog });
-            
+
             // Registrar auditoría
             await this._registrarAuditoria({
                 tablaafectada: 'PasarelaSuscripcion',
                 idregistro: insertedSuscripcion[0]?.idsuscpas,
                 accion: 'INSERT',
-                camposcambiados: { 
-                    idclipas, 
-                    idplanpas, 
-                    idtarjpas, 
+                camposcambiados: {
+                    idclipas,
+                    idplanpas,
+                    idtarjpas,
                     idsuscext: data.idsuscext,
                     estsuscripcion: data.estsuscripcion,
                     idapilog: data.idapilog
                 },
                 idusu: data.idusu
             });
-            
+
             return { success: true, idsuscpas: insertedSuscripcion[0]?.idsuscpas };
-            
+
         } catch (error) {
             secureLogger.error('Error al guardar suscripción local', error);
             return { success: false, error: 'Error al guardar suscripción' };
@@ -1802,12 +1913,12 @@ class OpenPayService {
     async obtenerSuscripcionesCliente(idusu) {
         try {
             await this.ensureInitialized();
-            
+
             const validatedIdusu = parseInt(idusu, 10);
             if (isNaN(validatedIdusu) || validatedIdusu < 1) {
                 return { success: false, suscripciones: [] };
             }
-            
+
             const result = await sequelize.query(
                 `SELECT ps.idsuscpas, ps.idsuscext, ps.idplanpas, pp.nomplanext,
                         pp.precio, pp.frecuencianum, pp.frecuenciaunidad,
@@ -1824,13 +1935,13 @@ class OpenPayService {
                     type: QueryTypes.SELECT
                 }
             );
-            
+
             return {
                 success: true,
                 suscripciones: result,
                 tieneSuscripcionActiva: result.length > 0
             };
-            
+
         } catch (error) {
             secureLogger.error('Error al obtener suscripciones del cliente', error);
             return { success: false, suscripciones: [], error: error.message };
@@ -1848,12 +1959,12 @@ class OpenPayService {
         try {
             this._checkRateLimit();
             await this.ensureInitialized();
-            
+
             const sanitizedPlanId = sanitizeString(planId, 100);
             if (!sanitizedPlanId) {
                 throw new Error('ID de plan inválido');
             }
-            
+
             const response = await this._executeWithLogging(
                 () => this.axiosInstance.get(`/plans/${sanitizedPlanId}`),
                 {
@@ -1864,23 +1975,23 @@ class OpenPayService {
                     auditContext: {}
                 }
             );
-            
+
             if (response.data && response.data.id) {
                 return {
                     success: true,
                     plan: response.data
                 };
             }
-            
+
             throw new Error('Respuesta inválida');
-            
+
         } catch (error) {
             secureLogger.error('Error al obtener plan', error);
-            
+
             if (error.response?.status === 404) {
                 return { success: false, error: 'Plan no encontrado', code: 'NOT_FOUND' };
             }
-            
+
             return {
                 success: false,
                 error: error.response?.data?.description || 'Error al obtener plan',
@@ -1895,12 +2006,12 @@ class OpenPayService {
     async obtenerPlanLocal(idplanpas) {
         try {
             await this.ensureInitialized();
-            
+
             const validatedId = parseInt(idplanpas, 10);
             if (isNaN(validatedId) || validatedId < 1) {
                 return null;
             }
-            
+
             const result = await sequelize.query(
                 `SELECT pp.idplanpas, pp.codplanext, pp.nomplanext, pp.precio, 
                         pp.moneda, pp.frecuencianum, pp.frecuenciaunidad, pp.diasprueba,
@@ -1913,9 +2024,9 @@ class OpenPayService {
                     type: QueryTypes.SELECT
                 }
             );
-            
+
             return result.length > 0 ? result[0] : null;
-            
+
         } catch (error) {
             secureLogger.error('Error al obtener plan local', error);
             return null;
@@ -1936,22 +2047,22 @@ class OpenPayService {
         try {
             this._checkRateLimit();
             await this.ensureInitialized();
-            
+
             const validatedData = {
                 method: 'card',
                 amount: validateAmount(chargeData.amount),
                 currency: chargeData.currency || this.config.moneda || 'PEN',
                 description: sanitizeString(chargeData.description || 'Pago ModoFit', 250)
             };
-            
+
             if (chargeData.source_id) {
                 validatedData.source_id = sanitizeString(chargeData.source_id, 100);
             }
-            
+
             if (chargeData.device_session_id) {
                 validatedData.device_session_id = sanitizeString(chargeData.device_session_id, 100);
             }
-            
+
             // Soporte para 3D Secure
             if (chargeData.use_3d_secure) {
                 validatedData.use_3d_secure = true;
@@ -1961,12 +2072,12 @@ class OpenPayService {
                     throw new Error('redirect_url es requerida cuando use_3d_secure está activo');
                 }
             }
-            
+
             // Order ID para seguimiento
             if (chargeData.order_id) {
                 validatedData.order_id = sanitizeString(chargeData.order_id, 100);
             }
-            
+
             if (chargeData.customer) {
                 validatedData.customer = {
                     name: sanitizeString(chargeData.customer.name, 100),
@@ -1975,9 +2086,9 @@ class OpenPayService {
                     phone_number: chargeData.customer.phone_number?.replace(/[^0-9]/g, '').substring(0, 15)
                 };
             }
-            
+
             secureLogger.info('Creando cargo', { amount: validatedData.amount, use_3d_secure: !!chargeData.use_3d_secure });
-            
+
             const response = await this._executeWithLogging(
                 () => this.axiosInstance.post('/charges', validatedData),
                 {
@@ -1988,7 +2099,7 @@ class OpenPayService {
                     auditContext: {}
                 }
             );
-            
+
             if (response.data && response.data.id) {
                 const result = {
                     success: true,
@@ -2003,22 +2114,22 @@ class OpenPayService {
                         order_id: response.data.order_id
                     }
                 };
-                
+
                 // Si es 3D Secure, agregar información de redirección
                 if (response.data.payment_method && response.data.payment_method.url) {
                     result.requires_3d_secure = true;
                     result.redirect_url = response.data.payment_method.url;
                     result.cargo.payment_method = response.data.payment_method;
                 }
-                
+
                 return result;
             }
-            
+
             throw new Error('Respuesta inválida al crear cargo');
-            
+
         } catch (error) {
             secureLogger.error('Error al crear cargo', error);
-            
+
             return {
                 success: false,
                 error: error.response?.data?.description || 'Error al procesar el pago',
@@ -2046,14 +2157,14 @@ class OpenPayService {
         try {
             this._checkRateLimit();
             await this.ensureInitialized();
-            
+
             const sanitizedId = sanitizeString(chargeId, 100);
             if (!sanitizedId) {
                 throw new Error('ID de cargo inválido');
             }
-            
+
             secureLogger.info('Obteniendo cargo', { chargeId: sanitizedId });
-            
+
             const response = await this._executeWithLogging(
                 () => this.axiosInstance.get(`/charges/${sanitizedId}`),
                 {
@@ -2064,7 +2175,7 @@ class OpenPayService {
                     auditContext: {}
                 }
             );
-            
+
             if (response.data && response.data.id) {
                 return {
                     success: true,
@@ -2082,16 +2193,16 @@ class OpenPayService {
                     }
                 };
             }
-            
+
             throw new Error('Respuesta inválida');
-            
+
         } catch (error) {
             secureLogger.error('Error al obtener cargo', error);
-            
+
             if (error.response?.status === 404) {
                 return { success: false, error: 'Cargo no encontrado', code: 'NOT_FOUND' };
             }
-            
+
             return {
                 success: false,
                 error: error.response?.data?.description || 'Error al obtener cargo',

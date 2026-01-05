@@ -1,210 +1,541 @@
+<style>
+    /* Hero Video Section */
+    .section-hero {
+        height: 100vh;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .bg-video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .bg-video video {
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+    }
+
+    .bg-video::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.7) 100%);
+        z-index: 1;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        padding: 0 20px;
+    }
+
+    .hero-content h1 {
+        color: #fff;
+        font-size: 56px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        letter-spacing: -1px;
+    }
+
+    .hero-content h4 {
+        color: #fff;
+        font-size: 16px;
+        font-weight: 300;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+    }
+
+    .iconos-titulo {
+        margin: 25px 0;
+        text-align: center;
+    }
+
+    .iconos-titulo i {
+        color: var(--beige);
+        font-size: 5px;
+        margin: 0 6px;
+    }
+
+    .scroll-indicator {
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #fff;
+        font-size: 28px;
+        animation: bounce 1.5s infinite;
+        z-index: 2;
+        cursor: pointer;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateX(-50%) translateY(0); }
+        50% { transform: translateX(-50%) translateY(-10px); }
+    }
+
+    /* Section Nosotros */
+    .section-nosotros {
+        padding: 100px 0;
+        background: var(--negro);
+    }
+
+    .nosotros-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 60px;
+    }
+
+    .nosotros-img {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .nosotros-img img {
+        width: 100%;
+        height: auto;
+        filter: grayscale(30%);
+        transition: filter 0.5s;
+    }
+
+    .nosotros-img:hover img {
+        filter: grayscale(0%);
+    }
+
+    .nosotros-content {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .title-section h3 {
+        font-size: 11px;
+        color: #777 !important;
+        letter-spacing: 4px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    .title-section h2 {
+        font-size: 38px;
+        color: #fff;
+        margin-bottom: 10px;
+        line-height: 1.1;
+    }
+
+    .title-section h2 span {
+        color: var(--beige);
+    }
+
+    .btn-inprov {
+        display: inline-block;
+        border: 1px solid var(--beige);
+        background: var(--beige);
+        color: #000;
+        padding: 14px 32px;
+        font-family: "Poppins", sans-serif;
+        font-weight: 800;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 25px;
+        transition: all 0.3s;
+        text-decoration: none;
+    }
+
+    .btn-inprov:hover {
+        background: transparent;
+        color: var(--beige);
+    }
+
+    /* Section Planes */
+    .section-planes {
+        padding: 100px 0;
+        background: var(--negro);
+    }
+
+    .section-planes .title-section {
+        text-align: center;
+        margin-bottom: 60px;
+    }
+
+    .planes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 30px;
+    }
+
+    .plan-card {
+        background: var(--negro-card);
+        border: 1px solid var(--borde);
+        padding: 45px 35px;
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .plan-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: var(--beige);
+        transform: scaleX(0);
+        transition: transform 0.4s ease;
+        transform-origin: left;
+    }
+
+    .plan-card:hover {
+        border-color: var(--beige);
+        transform: translateY(-8px);
+    }
+
+    .plan-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .plan-card h4 {
+        color: #fff;
+        font-size: 22px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    .plan-card h4 span {
+        color: var(--beige);
+        font-style: italic;
+        font-weight: 300;
+    }
+
+    .plan-badge {
+        display: inline-block;
+        background: var(--gris-oscuro);
+        border: 1px solid var(--borde);
+        padding: 6px 14px;
+        font-size: 10px;
+        text-transform: uppercase;
+        color: var(--gris-texto);
+        letter-spacing: 1px;
+        margin-bottom: 25px;
+    }
+
+    .plan-price h2 {
+        font-family: "Poppins", sans-serif;
+        font-size: 52px;
+        color: var(--beige);
+        line-height: 1;
+    }
+
+    .plan-price h2 span {
+        font-size: 22px;
+        vertical-align: top;
+    }
+
+    .plan-price p {
+        font-size: 12px;
+        color: var(--gris-texto);
+        margin-top: 5px;
+    }
+
+    .plan-features {
+        list-style: none;
+        margin: 30px 0;
+        padding: 0;
+    }
+
+    .plan-features li {
+        padding: 10px 0;
+        color: var(--gris-texto);
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .plan-features li:last-child {
+        border-bottom: none;
+    }
+
+    .plan-features li i {
+        color: var(--beige);
+        font-size: 14px;
+    }
+
+    .plan-features li.destacado {
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .btn-plan {
+        display: block;
+        width: 100%;
+        text-align: center;
+        background: var(--beige);
+        color: #000;
+        padding: 16px 20px;
+        font-family: "Poppins", sans-serif;
+        font-weight: 800;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border: 1px solid var(--beige);
+        transition: all 0.3s;
+        text-decoration: none;
+    }
+
+    .btn-plan:hover {
+        background: transparent;
+        color: var(--beige);
+    }
+
+    /* Section Ubicacion */
+    .section-ubicacion {
+        padding: 100px 0;
+        background: #000;
+    }
+
+    .ubicacion-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 60px;
+    }
+
+    .ubicacion-content {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .ubicacion-content h2 {
+        font-size: 42px;
+        color: #fff;
+        margin-bottom: 20px;
+        line-height: 1.1;
+    }
+
+    .ubicacion-content h2 span {
+        color: var(--beige);
+    }
+
+    .ubicacion-info {
+        margin-top: 30px;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        color: #fff;
+        font-size: 16px;
+    }
+
+    .info-item i {
+        color: var(--beige);
+        font-size: 20px;
+        width: 25px;
+    }
+
+    .btn-direccion {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--beige);
+        border: 1px solid var(--beige);
+        color: #000;
+        padding: 14px 24px;
+        font-family: "Poppins", sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-top: 20px;
+        transition: all 0.3s;
+        text-decoration: none;
+    }
+
+    .btn-direccion:hover {
+        background: transparent;
+        color: var(--beige);
+    }
+
+    .mapa-container {
+        flex: 1;
+        min-width: 300px;
+        height: 400px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 2px solid var(--beige);
+    }
+
+    .mapa-container iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        filter: grayscale(20%) contrast(1.1);
+    }
+
+    /* Responsive */
+    @media (max-width: 991px) {
+        .hero-content h1 { font-size: 38px; }
+        .hero-content h4 { font-size: 13px; }
+        .nosotros-row, .ubicacion-row { flex-direction: column; }
+        .title-section h2 { font-size: 32px; }
+    }
+
+    @media (max-width: 767px) {
+        .section-hero { height: 80vh; }
+        .planes-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
 <!-- Hero Section -->
-<section class="hero-section bg-dark text-light position-relative overflow-hidden">
-    <div class="hero-overlay"></div>
-    <div class="container py-5">
-        <div class="row align-items-center min-vh-75">
-            <div class="col-lg-6">
-                <h1 class="display-4 fw-bold mb-4 animate__animated animate__fadeInLeft">
-                    Transforma tu cuerpo, <span class="text-primary">transforma tu vida</span>
-                </h1>
-                <p class="lead mb-4 animate__animated animate__fadeInLeft animate__delay-1s">
-                    En ModoFit te ayudamos a alcanzar tus metas fitness con las mejores instalaciones, 
-                    entrenadores certificados y una comunidad que te motiva cada día.
+<section class="section-hero">
+    <div class="bg-video">
+        <video src="/videos/Fitness-commercial.mp4" autoplay loop playsinline muted></video>
+    </div>
+    
+    <div class="hero-content">
+        <h1>ENTRENAMIENTO PERSONALIZADO</h1>
+        <div class="iconos-titulo">
+            <i class="bi bi-circle-fill"></i>
+            <i class="bi bi-circle-fill"></i>
+            <i class="bi bi-circle-fill"></i>
+        </div>
+        <h4>La mejor experiencia de entrenamiento acorde a tus objetivos</h4>
+    </div>
+    
+    <div class="scroll-indicator" onclick="document.getElementById('nosotros').scrollIntoView({behavior: 'smooth'})">
+        <i class="bi bi-chevron-down"></i>
+    </div>
+</section>
+
+<!-- Nosotros Section -->
+<section id="nosotros" class="section-nosotros">
+    <div class="container">
+        <div class="nosotros-row">
+            <div class="nosotros-img">
+                <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1470&auto=format&fit=crop" alt="MODOFIT Studio">
+            </div>
+            <div class="nosotros-content">
+                <div class="title-section">
+                    <h3>NOSOTROS</h3>
+                    <h2>¡CONOCE<br><span>MODOFIT</span> STUDIO!</h2>
+                </div>
+                <div class="iconos-titulo" style="text-align: left;">
+                    <i class="bi bi-circle-fill"></i>
+                    <i class="bi bi-circle-fill"></i>
+                    <i class="bi bi-circle-fill"></i>
+                </div>
+                <p>
+                    En nuestro exclusivo centro boutique, te ofrecemos un entrenamiento personalizado de primera clase. 
+                    Ya seas un atleta experimentado o estés dando tus primeros pasos en el mundo del fitness, 
+                    estamos aquí para guiarte hacia el éxito de manera efectiva y saludable.
                 </p>
-                <div class="d-flex gap-3 animate__animated animate__fadeInUp animate__delay-2s">
-                    <a href="/pedidos" class="btn btn-primary btn-lg px-4">
-                        <i class="bi bi-cart-plus me-2"></i>Comprar Membresía
-                    </a>
-                    <a href="/servicios" class="btn btn-outline-light btn-lg px-4">
-                        Ver Servicios
-                    </a>
-                </div>
-            </div>
-            <div class="col-lg-6 text-center">
-                <img src="/img/hero-gym.webp" alt="Gimnasio ModoFit" class="img-fluid rounded-4 shadow-lg animate__animated animate__fadeInRight" onerror="this.style.display='none'">
+                <p><strong style="color: #fff;">¡Únete a nosotros y haz de cada sesión un paso más hacia tu mejor versión!</strong></p>
+                <a href="#planes" class="btn-inprov">VER PLANES</a>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Features Section -->
-<section class="py-5 bg-light">
+<!-- Planes Section -->
+<section id="planes" class="section-planes">
     <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="fw-bold">¿Por qué elegir ModoFit?</h2>
-            <p class="text-muted">Todo lo que necesitas para alcanzar tus objetivos</p>
+        <div class="title-section">
+            <h3>PLANES</h3>
+            <h2>ELIGE TU <span>CAMINO</span></h2>
+            <div class="iconos-titulo">
+                <i class="bi bi-circle-fill"></i>
+                <i class="bi bi-circle-fill"></i>
+                <i class="bi bi-circle-fill"></i>
+            </div>
+            <p style="max-width: 600px; margin: 20px auto 0;">Sin contratos forzosos. Cancela cuando quieras. Resultados garantizados si sigues el plan.</p>
         </div>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm text-center p-4">
-                    <div class="card-body">
-                        <div class="feature-icon bg-primary text-light rounded-circle mb-4 mx-auto">
-                            <i class="bi bi-trophy fs-2"></i>
-                        </div>
-                        <h5 class="card-title fw-bold">Equipos de Primera</h5>
-                        <p class="card-text text-muted">Contamos con equipos de última generación para todos tus entrenamientos.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm text-center p-4">
-                    <div class="card-body">
-                        <div class="feature-icon bg-success text-light rounded-circle mb-4 mx-auto">
-                            <i class="bi bi-people fs-2"></i>
-                        </div>
-                        <h5 class="card-title fw-bold">Entrenadores Certificados</h5>
-                        <p class="card-text text-muted">Profesionales capacitados para guiarte en cada paso de tu transformación.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm text-center p-4">
-                    <div class="card-body">
-                        <div class="feature-icon bg-warning text-dark rounded-circle mb-4 mx-auto">
-                            <i class="bi bi-calendar-check fs-2"></i>
-                        </div>
-                        <h5 class="card-title fw-bold">Horarios Flexibles</h5>
-                        <p class="card-text text-muted">Abiertos desde las 5am hasta las 11pm para adaptarnos a tu rutina.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
-<!-- Plans Section -->
-<section class="py-5">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="fw-bold">Nuestros Planes</h2>
-            <p class="text-muted">Elige el plan que mejor se adapte a ti</p>
-        </div>
-        <div class="row g-4 justify-content-center">
+        <div class="planes-grid">
             {{#if planes.length}}
                 {{#each planes}}
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 border-0 {{#if @first}}shadow{{else}}{{#if @last}}shadow{{else}}shadow-lg border-primary{{/if}}{{/if}}">
-                        <div class="card-header {{#if @first}}bg-secondary{{else}}{{#if @last}}bg-dark{{else}}bg-primary{{/if}}{{/if}} text-light text-center py-4">
-                            {{#unless @first}}{{#unless @last}}
-                            <span class="badge bg-warning text-dark mb-2">MÁS POPULAR</span>
-                            {{/unless}}{{/unless}}
-                            <h4 class="mb-0">{{#if nomplanext}}{{nomplanext}}{{else}}{{despro}}{{/if}}</h4>
-                        </div>
-                        <div class="card-body text-center p-4">
-                            <h2 class="display-4 fw-bold text-primary">{{moneda}} {{formatPrecio precio}}</h2>
-                            <p class="text-muted mb-4">/{{frecuenciaTexto frecuencianum frecuenciaunidad}}</p>
-                            <p class="text-muted mb-3">{{despro}}</p>
-                            {{#if durpro}}
-                            <p class="small text-muted mb-2"><i class="bi bi-clock me-1"></i>Duración: {{durpro}} días</p>
-                            {{/if}}
-                            {{#if diasprueba}}
-                            <p class="small text-success mb-2"><i class="bi bi-gift me-1"></i>{{diasprueba}} días de prueba gratis</p>
-                            {{/if}}
-                        </div>
-                        <div class="card-footer bg-transparent border-0 p-4">
-                            <a href="/pedidos" class="btn {{#if @first}}btn-outline-primary{{else}}{{#if @last}}btn-outline-dark{{else}}btn-primary{{/if}}{{/if}} w-100">
-                                <i class="bi bi-cart-plus me-2"></i>Elegir Plan
-                            </a>
-                        </div>
+                <div class="plan-card">
+                    <h4><span>Plan</span> {{#if nomplanext}}{{nomplanext}}{{else}}{{despro}}{{/if}}</h4>
+                    <span class="plan-badge">{{frecuenciaTexto frecuencianum frecuenciaunidad}}</span>
+                    
+                    <div class="plan-price">
+                        <h2><span>{{moneda}}</span>{{formatPrecio precio}}</h2>
+                        <p>{{despro}}</p>
                     </div>
+
+                    <ul class="plan-features">
+                        {{#if durpro}}
+                        <li><i class="bi bi-check2"></i> Duración: {{durpro}} días</li>
+                        {{/if}}
+                        <li><i class="bi bi-check2"></i> Acceso App Móvil</li>
+                        <li><i class="bi bi-check2"></i> Soporte 24/7</li>
+                        <li><i class="bi bi-check2"></i> Video-guías HD</li>
+                        {{#if diasprueba}}
+                        <li class="destacado"><i class="bi bi-gift"></i> {{diasprueba}} Días de Prueba Gratis</li>
+                        {{/if}}
+                    </ul>
+
+                    <a href="/pedidos" class="btn-plan">SELECCIONAR</a>
                 </div>
                 {{/each}}
             {{else}}
-                <div class="col-12 text-center py-5">
-                    <i class="bi bi-card-list fs-1 text-muted"></i>
-                    <p class="mt-3 text-muted">Pronto tendremos planes disponibles para ti</p>
+                <div style="text-align: center; padding: 60px 20px; grid-column: 1 / -1;">
+                    <p style="color: var(--gris-texto); font-style: italic;">Cargando planes disponibles...</p>
                 </div>
             {{/if}}
         </div>
     </div>
 </section>
 
-<!-- CTA Section -->
-<section class="py-5 bg-primary text-light">
-    <div class="container text-center">
-        <h2 class="fw-bold mb-3">¿Listo para comenzar tu transformación?</h2>
-        <p class="lead mb-4">Únete a la familia ModoFit y comienza a ver resultados desde la primera semana</p>
-        <a href="/auth/registro" class="btn btn-light btn-lg px-5">
-            <i class="bi bi-lightning-charge me-2"></i>Regístrate Ahora
-        </a>
-    </div>
-</section>
-
-<!-- Testimonials -->
-<section class="py-5 bg-light">
+<!-- Ubicacion Section -->
+<section class="section-ubicacion">
     <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="fw-bold">Lo que dicen nuestros miembros</h2>
-        </div>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <div class="d-flex mb-3">
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                        </div>
-                        <p class="card-text">"Excelente gimnasio, los entrenadores son muy profesionales y las instalaciones están siempre limpias."</p>
-                        <div class="d-flex align-items-center mt-3">
-                            <div class="bg-primary text-light rounded-circle p-2 me-3">
-                                <i class="bi bi-person"></i>
-                            </div>
-                            <div>
-                                <strong>María García</strong>
-                                <br><small class="text-muted">Miembro desde 2023</small>
-                            </div>
-                        </div>
+        <div class="ubicacion-row">
+            <div class="ubicacion-content">
+                <h2>VISÍTANOS EN<br>NUESTRO <span>ESTUDIO</span></h2>
+                <p>Te esperamos en nuestras modernas instalaciones, equipadas con la mejor tecnología para tu entrenamiento personalizado.</p>
+                
+                <div class="ubicacion-info">
+                    <div class="info-item">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        <span>Av. Echenique 600, Huacho</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="bi bi-clock-fill"></i>
+                        <span>Lun - Vie: 6:00 AM - 10:00 PM</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="bi bi-telephone-fill"></i>
+                        <span>+51 999 999 999</span>
                     </div>
                 </div>
+
+                <a href="https://maps.google.com/?cid=3665896515896953081" target="_blank" class="btn-direccion">
+                    <i class="bi bi-map"></i> VER EN GOOGLE MAPS
+                </a>
             </div>
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <div class="d-flex mb-3">
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                        </div>
-                        <p class="card-text">"Bajé 15 kilos en 4 meses gracias al programa personalizado. El mejor gimnasio de la zona."</p>
-                        <div class="d-flex align-items-center mt-3">
-                            <div class="bg-primary text-light rounded-circle p-2 me-3">
-                                <i class="bi bi-person"></i>
-                            </div>
-                            <div>
-                                <strong>Carlos Rodríguez</strong>
-                                <br><small class="text-muted">Miembro desde 2022</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <div class="d-flex mb-3">
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-fill text-warning"></i>
-                            <i class="bi bi-star-half text-warning"></i>
-                        </div>
-                        <p class="card-text">"Las clases grupales son increíbles. El ambiente es muy motivador y siempre me siento bienvenida."</p>
-                        <div class="d-flex align-items-center mt-3">
-                            <div class="bg-primary text-light rounded-circle p-2 me-3">
-                                <i class="bi bi-person"></i>
-                            </div>
-                            <div>
-                                <strong>Ana López</strong>
-                                <br><small class="text-muted">Miembro desde 2024</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="mapa-container">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15660.311020251009!2d-77.6100985!3d-11.1075829!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9106df000486a4c7%3A0x32b9e624437cccf9!2sMODO%20FIT!5e0!3m2!1ses-419!2spe!4v1767580905839!5m2!1ses-419!2spe"
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
             </div>
         </div>
     </div>

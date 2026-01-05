@@ -131,7 +131,7 @@ async function cargarDashboard() {
             // Membresía
             const membresia = data.data.membresia;
             document.getElementById('membresia-nombre').textContent = membresia ? membresia.tipomem : 'Sin membresía';
-            document.getElementById('membresia-vencimiento').textContent = membresia ? formatearFecha(membresia.fecfinmem) : '-';
+            document.getElementById('membresia-vencimiento').textContent = membresia ? membresia.fecfinmem : '-';
             
             // Pedidos
             const pedidos = data.data.pedidos || [];
@@ -175,10 +175,10 @@ function renderizarPedidos(pedidos) {
                 <tbody>
                     ${pedidos.map(p => `
                         <tr>
-                            <td>#${p.idped}</td>
-                            <td>${formatearFecha(p.fecped)}</td>
-                            <td>S/ ${parseFloat(p.totped).toFixed(2)}</td>
-                            <td>${getEstadoBadge(p.estped)}</td>
+                            <td>#${p.idven}</td>
+                            <td>${p.fecha}</td>
+                            <td>S/ ${p.total}</td>
+                            <td>${p.estado.html}</td>
                         </tr>
                     `).join('')}
                 </tbody>
@@ -193,40 +193,28 @@ function renderizarReservas(reservas) {
     if (reservas.length === 0) {
         container.innerHTML = `
             <div class="text-center py-5 text-muted">
-                <i class="bi bi-calendar-x fs-1"></i>
-                <p class="mt-2">No tienes reservas activas</p>
+                <i class="bi bi-calendar-check fs-1"></i>
+                <p class="mt-2">No tienes asistencias registradas</p>
             </div>
         `;
         return;
     }
     
     container.innerHTML = `
+        <h6 class="border-bottom pb-2 mb-3">Últimas Asistencias</h6>
         <ul class="list-group list-group-flush">
             ${reservas.map(r => `
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <div>
-                        <strong>${r.nomres}</strong>
-                        <br><small class="text-muted">${formatearFecha(r.fecres)}</small>
+                        <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                        <strong>Ingreso al Gym</strong>
+                        <br><small class="text-muted ms-4">${r.fecha}</small>
                     </div>
-                    <span class="badge bg-primary">Confirmada</span>
+                    <span class="badge bg-success"><i class="bi bi-check-lg"></i></span>
                 </li>
             `).join('')}
         </ul>
     `;
-}
-
-function getEstadoBadge(estado) {
-    switch(estado) {
-        case 'P': return '<span class="badge bg-warning">Pendiente</span>';
-        case 'C': return '<span class="badge bg-success">Completado</span>';
-        case 'X': return '<span class="badge bg-danger">Cancelado</span>';
-        default: return '<span class="badge bg-secondary">-</span>';
-    }
-}
-
-function formatearFecha(fecha) {
-    if (!fecha) return '-';
-    return new Date(fecha).toLocaleDateString('es-PE');
 }
 
 document.addEventListener('DOMContentLoaded', cargarDashboard);

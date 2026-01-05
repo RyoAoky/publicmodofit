@@ -1,22 +1,353 @@
-<section class="py-5 bg-dark text-light">
+<style>
+    .section-header {
+        padding: 140px 0 60px;
+        background: var(--negro);
+        text-align: center;
+    }
+
+    .section-header h1 {
+        font-size: 48px;
+        color: #fff;
+        margin-bottom: 10px;
+    }
+
+    .section-header p {
+        font-size: 14px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    .section-shop {
+        padding: 40px 0 100px;
+        background: var(--negro);
+    }
+
+    /* Tabs INPROV Style */
+    .nav-pills-inprov {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 50px;
+    }
+
+    .nav-pills-inprov .nav-link {
+        background: var(--negro-card);
+        border: 1px solid var(--borde);
+        color: var(--gris-texto);
+        font-family: "Poppins", sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 16px 40px;
+        border-radius: 0;
+        transition: all 0.3s;
+    }
+
+    .nav-pills-inprov .nav-link:hover {
+        border-color: var(--beige);
+        color: var(--beige);
+    }
+
+    .nav-pills-inprov .nav-link.active {
+        background: var(--beige);
+        border-color: var(--beige);
+        color: #000;
+    }
+
+    .iconos-titulo {
+        margin: 20px 0;
+    }
+
+    .iconos-titulo i {
+        color: var(--beige);
+        font-size: 4px;
+        margin: 0 5px;
+    }
+
+    /* Product Grid */
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+    }
+
+    .product-card {
+        background: var(--negro-card);
+        border: 1px solid var(--borde);
+        transition: all 0.3s;
+        overflow: hidden;
+    }
+
+    .product-card:hover {
+        border-color: var(--beige);
+        transform: translateY(-5px);
+    }
+
+    .product-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        filter: grayscale(30%);
+        transition: filter 0.3s;
+    }
+
+    .product-card:hover img {
+        filter: grayscale(0%);
+    }
+
+    .product-info {
+        padding: 25px;
+    }
+
+    .product-info h5 {
+        color: #fff;
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    .product-price {
+        color: var(--beige);
+        font-family: "Poppins", sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .btn-add-cart {
+        display: block;
+        width: 100%;
+        background: transparent;
+        border: 1px solid var(--beige);
+        color: var(--beige);
+        font-family: "Poppins", sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 12px;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .btn-add-cart:hover {
+        background: var(--beige);
+        color: #000;
+    }
+
+    /* Plans Grid */
+    .plans-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 30px;
+    }
+
+    .plan-card {
+        background: var(--negro-card);
+        border: 1px solid var(--borde);
+        padding: 40px 30px;
+        transition: all 0.4s;
+        position: relative;
+    }
+
+    .plan-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: var(--beige);
+        transform: scaleX(0);
+        transition: transform 0.4s;
+        transform-origin: left;
+    }
+
+    .plan-card:hover {
+        border-color: var(--beige);
+        transform: translateY(-8px);
+    }
+
+    .plan-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .plan-card.popular {
+        border-color: var(--beige);
+    }
+
+    .plan-card.popular::before {
+        transform: scaleX(1);
+    }
+
+    .popular-badge {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: var(--beige);
+        color: #000;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 5px 12px;
+        letter-spacing: 1px;
+    }
+
+    .plan-card h4 {
+        color: #fff;
+        font-size: 20px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    .plan-badge {
+        display: inline-block;
+        background: var(--gris-oscuro);
+        border: 1px solid var(--borde);
+        padding: 5px 12px;
+        font-size: 10px;
+        text-transform: uppercase;
+        color: var(--gris-texto);
+        letter-spacing: 1px;
+        margin-bottom: 20px;
+    }
+
+    .plan-price {
+        margin-bottom: 20px;
+    }
+
+    .plan-price h2 {
+        font-size: 48px;
+        color: var(--beige);
+        line-height: 1;
+    }
+
+    .plan-price h2 span {
+        font-size: 20px;
+        vertical-align: top;
+    }
+
+    .plan-price p {
+        font-size: 12px;
+        color: var(--gris-texto);
+        margin-top: 5px;
+    }
+
+    .plan-features {
+        list-style: none;
+        padding: 0;
+        margin: 25px 0;
+    }
+
+    .plan-features li {
+        padding: 10px 0;
+        color: var(--gris-texto);
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .plan-features li:last-child {
+        border-bottom: none;
+    }
+
+    .plan-features li i {
+        color: var(--beige);
+    }
+
+    .plan-features li.destacado {
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .btn-plan {
+        display: block;
+        width: 100%;
+        text-align: center;
+        background: var(--beige);
+        color: #000;
+        padding: 16px;
+        font-family: "Poppins", sans-serif;
+        font-weight: 800;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border: 1px solid var(--beige);
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .btn-plan:hover {
+        background: transparent;
+        color: var(--beige);
+    }
+
+    /* Floating Cart */
+    .floating-cart {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 1000;
+    }
+
+    .floating-cart a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--beige);
+        color: #000;
+        padding: 16px 24px;
+        font-family: "Poppins", sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.3s;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+    }
+
+    .floating-cart a:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    }
+
+    .cart-badge {
+        background: #000;
+        color: var(--beige);
+        padding: 4px 10px;
+        font-size: 12px;
+    }
+
+    .spinner-border {
+        color: var(--beige);
+    }
+</style>
+
+<!-- Header -->
+<section class="section-header">
     <div class="container">
-        <div class="text-center">
-            <h1 class="display-5 fw-bold">Tienda ModoFit</h1>
-            <p class="lead">Elige tu membresía o productos</p>
+        <h1>TIENDA MODOFIT</h1>
+        <div class="iconos-titulo">
+            <i class="bi bi-circle-fill"></i>
+            <i class="bi bi-circle-fill"></i>
+            <i class="bi bi-circle-fill"></i>
         </div>
+        <p>Elige tu membresía o productos</p>
     </div>
 </section>
 
-<section class="py-5">
+<!-- Shop Section -->
+<section class="section-shop">
     <div class="container">
         <!-- Tabs -->
-        <ul class="nav nav-pills nav-fill mb-4" id="shopTabs" role="tablist">
-            <li class="nav-item" role="presentation">
+        <ul class="nav-pills-inprov" id="shopTabs" role="tablist">
+            <li role="presentation">
                 <button class="nav-link active" id="membresias-tab" data-bs-toggle="pill" data-bs-target="#membresias" type="button">
                     <i class="bi bi-card-checklist me-2"></i>Membresías
                 </button>
             </li>
-            <li class="nav-item" role="presentation">
+            <li role="presentation">
                 <button class="nav-link" id="productos-tab" data-bs-toggle="pill" data-bs-target="#productos" type="button">
                     <i class="bi bi-box me-2"></i>Productos
                 </button>
@@ -26,10 +357,9 @@
         <div class="tab-content" id="shopTabsContent">
             <!-- Membresías Tab -->
             <div class="tab-pane fade show active" id="membresias" role="tabpanel">
-                <div class="row g-4" id="membresias-container">
-                    <!-- Las membresías se cargan dinámicamente -->
-                    <div class="col-12 text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
+                <div class="plans-grid" id="membresias-container">
+                    <div style="text-align: center; padding: 60px; grid-column: 1/-1;">
+                        <div class="spinner-border" role="status">
                             <span class="visually-hidden">Cargando...</span>
                         </div>
                     </div>
@@ -38,10 +368,9 @@
 
             <!-- Productos Tab -->
             <div class="tab-pane fade" id="productos" role="tabpanel">
-                <div class="row g-4" id="productos-container">
-                    <!-- Los productos se cargan dinámicamente -->
-                    <div class="col-12 text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
+                <div class="products-grid" id="productos-container">
+                    <div style="text-align: center; padding: 60px; grid-column: 1/-1;">
+                        <div class="spinner-border" role="status">
                             <span class="visually-hidden">Cargando...</span>
                         </div>
                     </div>
@@ -52,19 +381,17 @@
 </section>
 
 <!-- Floating Cart Button -->
-<div class="position-fixed bottom-0 end-0 p-4" style="z-index: 1050;">
-    <a href="/pedidos/carrito" class="btn btn-primary btn-lg rounded-pill shadow-lg">
-        <i class="bi bi-cart3 me-2"></i>
+<div class="floating-cart">
+    <a href="/pedidos/carrito">
+        <i class="bi bi-cart3"></i>
         <span class="cart-total">S/ 0.00</span>
-        <span class="badge bg-light text-primary ms-2 cart-items">0</span>
+        <span class="cart-badge cart-items">0</span>
     </a>
 </div>
 
 <script>
-// Carrito en localStorage
 let carrito = JSON.parse(localStorage.getItem('modofit_carrito')) || [];
 
-// Obtener etiqueta de frecuencia legible
 function getFrecuenciaLabel(num, unidad) {
     const unidades = {
         'day': { singular: 'día', plural: 'días' },
@@ -72,12 +399,10 @@ function getFrecuenciaLabel(num, unidad) {
         'month': { singular: 'mes', plural: 'meses' },
         'year': { singular: 'año', plural: 'años' }
     };
-    
     const u = unidades[unidad] || { singular: unidad, plural: unidad };
     return num === 1 ? `1 ${u.singular}` : `${num} ${u.plural}`;
 }
 
-// Cargar membresías/planes desde API (PasarelaPlan + Producto)
 async function cargarMembresias() {
     const container = document.getElementById('membresias-container');
     try {
@@ -86,45 +411,42 @@ async function cargarMembresias() {
         
         if (data.success && data.data.length > 0) {
             container.innerHTML = data.data.map((plan, index) => `
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 border-0 shadow-sm ${index === 1 ? 'border-primary border-2' : ''}">
-                        ${index === 1 ? '<div class="card-header bg-primary text-light text-center py-2"><span class="badge bg-warning text-dark">MÁS POPULAR</span></div>' : ''}
-                        <div class="card-body text-center p-4">
-                            <h5 class="card-title fw-bold">${plan.nomplanext || plan.despro}</h5>
-                            <h3 class="text-primary fw-bold mb-3">
-                                ${plan.moneda} ${parseFloat(plan.precio).toFixed(2)}
-                                <small class="fs-6 text-muted fw-normal">/ ${getFrecuenciaLabel(plan.frecuencianum, plan.frecuenciaunidad)}</small>
-                            </h3>
-                            <p class="text-muted mb-2">${plan.despro}</p>
-                            ${plan.durpro ? `<p class="small text-muted mb-3"><i class="bi bi-clock me-1"></i>Duración: ${plan.durpro} días</p>` : ''}
-                            ${plan.diasprueba > 0 ? `<p class="small text-success mb-3"><i class="bi bi-gift me-1"></i>${plan.diasprueba} días de prueba gratis</p>` : ''}
-                            <button class="btn btn-primary w-100" 
-                                    onclick="agregarAlCarrito('plan', '${plan.barcpro}', '${(plan.nomplanext || plan.despro).replace(/'/g, "\\'")}', ${plan.precio}, ${plan.idplanpas})">
-                                <i class="bi bi-cart-plus me-2"></i>Suscribirse
-                            </button>
-                        </div>
-                        <div class="card-footer bg-light border-0 text-center py-2">
-                            <small class="text-muted">
-                                <i class="bi bi-credit-card me-1"></i>Pago seguro con ${plan.nompasarela}
-                            </small>
-                        </div>
+                <div class="plan-card ${index === 1 ? 'popular' : ''}">
+                    ${index === 1 ? '<span class="popular-badge">Más Popular</span>' : ''}
+                    <h4>${plan.nomplanext || plan.despro}</h4>
+                    <span class="plan-badge">${getFrecuenciaLabel(plan.frecuencianum, plan.frecuenciaunidad)}</span>
+                    
+                    <div class="plan-price">
+                        <h2><span>${plan.moneda}</span>${parseFloat(plan.precio).toFixed(2)}</h2>
+                        <p>${plan.despro}</p>
                     </div>
+
+                    <ul class="plan-features">
+                        ${plan.durpro ? `<li><i class="bi bi-check2"></i> Duración: ${plan.durpro} días</li>` : ''}
+                        <li><i class="bi bi-check2"></i> Acceso App Móvil</li>
+                        <li><i class="bi bi-check2"></i> Soporte 24/7</li>
+                        <li><i class="bi bi-check2"></i> Video-guías HD</li>
+                        ${plan.diasprueba > 0 ? `<li class="destacado"><i class="bi bi-gift"></i> ${plan.diasprueba} días de prueba gratis</li>` : ''}
+                    </ul>
+
+                    <button class="btn-plan" onclick="agregarAlCarrito('plan', '${plan.barcpro}', '${(plan.nomplanext || plan.despro).replace(/'/g, "\\'")}', ${plan.precio}, ${plan.idplanpas}, '${plan.codplanext || ''}')">
+                        <i class="bi bi-cart-plus me-2"></i>Suscribirse
+                    </button>
                 </div>
             `).join('');
         } else {
             container.innerHTML = `
-                <div class="col-12 text-center py-5">
-                    <i class="bi bi-card-list fs-1 text-muted"></i>
-                    <p class="mt-3 text-muted">No hay planes de membresía disponibles por el momento</p>
+                <div style="text-align: center; padding: 60px; grid-column: 1/-1;">
+                    <i class="bi bi-card-list" style="font-size: 48px; color: var(--gris-texto);"></i>
+                    <p style="margin-top: 20px; color: var(--gris-texto);">No hay planes disponibles</p>
                 </div>
             `;
         }
     } catch (error) {
-        console.error('Error al cargar planes:', error);
-        container.innerHTML = '<div class="col-12 text-center py-5"><p class="text-muted">Error al cargar planes de membresía</p></div>';
+        container.innerHTML = '<div style="text-align: center; padding: 60px; grid-column: 1/-1;"><p style="color: var(--gris-texto);">Error al cargar planes</p></div>';
     }
 }
-// Cargar productos desde API
+
 async function cargarProductos() {
     const container = document.getElementById('productos-container');
     try {
@@ -133,38 +455,34 @@ async function cargarProductos() {
         
         if (data.success && data.data.length > 0) {
             container.innerHTML = data.data.map(p => `
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <img src="/img/productos/${p.imgpro || 'default.jpg'}" class="card-img-top" alt="${p.nompro}" onerror="this.src='/img/no-image.png'">
-                        <div class="card-body">
-                            <h6 class="card-title fw-bold">${p.nompro}</h6>
-                            <p class="text-primary fw-bold mb-2">S/ ${parseFloat(p.prepro).toFixed(2)}</p>
-                            <button class="btn btn-outline-primary btn-sm w-100" onclick="agregarAlCarrito('producto', ${p.idpro}, '${p.nompro}', ${p.prepro})">
-                                <i class="bi bi-cart-plus"></i> Agregar
-                            </button>
-                        </div>
+                <div class="product-card">
+                    <img src="/img/productos/${p.imgpro || 'default.jpg'}" alt="${p.nompro}" onerror="this.src='/img/no-image.png'">
+                    <div class="product-info">
+                        <h5>${p.nompro}</h5>
+                        <div class="product-price">S/ ${parseFloat(p.prepro).toFixed(2)}</div>
+                        <button class="btn-add-cart" onclick="agregarAlCarrito('producto', ${p.idpro}, '${p.nompro}', ${p.prepro})">
+                            <i class="bi bi-cart-plus me-2"></i>Agregar
+                        </button>
                     </div>
                 </div>
             `).join('');
         } else {
             container.innerHTML = `
-                <div class="col-12 text-center py-5">
-                    <i class="bi bi-box-seam fs-1 text-muted"></i>
-                    <p class="mt-3 text-muted">No hay productos disponibles por el momento</p>
+                <div style="text-align: center; padding: 60px; grid-column: 1/-1;">
+                    <i class="bi bi-box-seam" style="font-size: 48px; color: var(--gris-texto);"></i>
+                    <p style="margin-top: 20px; color: var(--gris-texto);">No hay productos disponibles</p>
                 </div>
             `;
         }
     } catch (error) {
-        console.error('Error al cargar productos:', error);
-        container.innerHTML = '<div class="col-12 text-center py-5"><p class="text-muted">Error al cargar productos</p></div>';
+        container.innerHTML = '<div style="text-align: center; padding: 60px; grid-column: 1/-1;"><p style="color: var(--gris-texto);">Error al cargar productos</p></div>';
     }
 }
 
-function agregarAlCarrito(tipo, id, nombre, precio, idplanpas = null) {
+function agregarAlCarrito(tipo, id, nombre, precio, idplanpas = null, codplanext = null) {
     const item = carrito.find(i => i.id === id && i.tipo === tipo);
     
     if (tipo === 'plan') {
-        // Para planes/suscripciones, solo se permite 1 en el carrito
         const planExistente = carrito.find(i => i.tipo === 'plan');
         if (planExistente) {
             Swal.fire({
@@ -173,68 +491,45 @@ function agregarAlCarrito(tipo, id, nombre, precio, idplanpas = null) {
                 text: 'Solo puedes tener un plan de membresía. ¿Deseas reemplazarlo?',
                 showCancelButton: true,
                 confirmButtonText: 'Sí, reemplazar',
-                cancelButtonText: 'No'
+                cancelButtonText: 'No',
+                background: '#0a0a0a',
+                color: '#BCBCBC',
+                confirmButtonColor: '#e4d09b'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Remover plan anterior
                     const indexPlan = carrito.findIndex(i => i.tipo === 'plan');
                     if (indexPlan > -1) carrito.splice(indexPlan, 1);
-                    // Agregar nuevo plan
-                    carrito.push({
-                        tipo,
-                        id, // barcpro
-                        idplanpas,
-                        nombre,
-                        precio,
-                        cantidad: 1
-                    });
+                    carrito.push({ tipo, id, idplanpas, codplanext, nombre, precio, cantidad: 1 });
                     localStorage.setItem('modofit_carrito', JSON.stringify(carrito));
                     actualizarCarritoUI();
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Plan actualizado!',
-                        text: nombre + ' es tu nuevo plan',
-                        showConfirmButton: false,
-                        timer: 1500,
-                        position: 'top-end',
-                        toast: true
-                    });
+                    mostrarToast('Plan actualizado', nombre + ' es tu nuevo plan');
                 }
             });
             return;
         }
-        // Agregar plan nuevo
-        carrito.push({
-            tipo,
-            id, // barcpro
-            idplanpas,
-            nombre,
-            precio,
-            cantidad: 1
-        });
+        carrito.push({ tipo, id, idplanpas, codplanext, nombre, precio, cantidad: 1 });
     } else if (item) {
         item.cantidad++;
     } else {
-        carrito.push({
-            tipo,
-            id,
-            nombre,
-            precio,
-            cantidad: 1
-        });
+        carrito.push({ tipo, id, nombre, precio, cantidad: 1 });
     }
     
     localStorage.setItem('modofit_carrito', JSON.stringify(carrito));
     actualizarCarritoUI();
-    
+    mostrarToast('¡Agregado!', nombre + ' se agregó al carrito');
+}
+
+function mostrarToast(title, text) {
     Swal.fire({
         icon: 'success',
-        title: '¡Agregado!',
-        text: nombre + ' se agregó al carrito',
+        title: title,
+        text: text,
         showConfirmButton: false,
         timer: 1500,
         position: 'top-end',
-        toast: true
+        toast: true,
+        background: '#0a0a0a',
+        color: '#fff'
     });
 }
 
@@ -242,19 +537,10 @@ function actualizarCarritoUI() {
     const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
     const items = carrito.reduce((sum, item) => sum + item.cantidad, 0);
     
-    document.querySelectorAll('.cart-total').forEach(el => {
-        el.textContent = 'S/ ' + total.toFixed(2);
-    });
-    document.querySelectorAll('.cart-items').forEach(el => {
-        el.textContent = items;
-    });
-    document.querySelectorAll('.cart-count').forEach(el => {
-        el.textContent = items;
-        el.style.display = items > 0 ? 'inline' : 'none';
-    });
+    document.querySelectorAll('.cart-total').forEach(el => el.textContent = 'S/ ' + total.toFixed(2));
+    document.querySelectorAll('.cart-items').forEach(el => el.textContent = items);
 }
 
-// Actualizar UI al cargar
 document.addEventListener('DOMContentLoaded', function() {
     actualizarCarritoUI();
     cargarMembresias();

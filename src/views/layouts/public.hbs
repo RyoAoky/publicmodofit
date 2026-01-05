@@ -3,75 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="ModoFit - Tu gimnasio de confianza">
-    <meta name="author" content="ModoFit">
-    <title>ModoFit - Tu Gimnasio</title>
+    <meta name="description" content="ModoFit - Centro boutique de entrenamiento personalizado">
+    <title>ModoFit - Entrenamiento Personalizado</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
+    <!-- Google Fonts - INPROV Style -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="/css/styles.css" rel="stylesheet">
-    <!-- Favicon -->
     <link rel="icon" href="/img/logo.ico" type="image/x-icon">
+    
+    <style>
+        :root {
+            --beige: #e4d09b;
+            --negro: #111;
+            --negro-card: #0a0a0a;
+            --gris-texto: #BCBCBC;
+            --gris-oscuro: #1a1a1a;
+            --borde: #222;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--negro);
+            color: var(--gris-texto);
+            font-family: "Montserrat", sans-serif;
+            font-weight: 300;
+            font-size: 13px;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: "Poppins", sans-serif;
+            letter-spacing: -0.2px;
+            color: var(--beige);
+        }
+
+        p {
+            font-family: "Montserrat", sans-serif;
+            font-weight: 300;
+            color: var(--gris-texto);
+            line-height: 1.8;
+        }
+
+        a { text-decoration: none; color: var(--beige); }
+
+        /* Navbar INPROV Style */
+        .navbar-inprov {
+            background: transparent !important;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 20px 0;
+            transition: all 0.3s ease;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1050;
+        }
+
+        .navbar-inprov.scrolled {
+            background: var(--negro) !important;
+            padding: 15px 0;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.5);
+        }
+
+        .navbar-brand {
+            font-family: "Poppins", sans-serif !important;
+            font-size: 1.8rem !important;
+            font-weight: 700 !important;
+            color: #fff !important;
+        }
+
+        .navbar-brand .text-beige { color: var(--beige) !important; }
+
+        .navbar-nav .nav-link {
+            color: #fff !important;
+            font-family: "Poppins", sans-serif !important;
+            font-size: 11px !important;
+            font-weight: 800 !important;
+            text-transform: uppercase !important;
+            margin: 0 15px !important;
+            transition: color 0.3s !important;
+            position: relative;
+        }
+
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--beige);
+            transition: width 0.3s;
+        }
+
+        .navbar-nav .nav-link:hover::after { width: 100%; }
+        .navbar-nav .nav-link:hover { color: var(--beige) !important; }
+
+        .btn-cuenta {
+            border: 1px solid #fff !important;
+            color: #fff !important;
+            background: transparent !important;
+            padding: 8px 18px !important;
+            border-radius: 0 !important;
+            font-family: "Poppins", sans-serif !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            transition: all 0.3s !important;
+        }
+
+        .btn-cuenta:hover {
+            background: var(--beige) !important;
+            border-color: var(--beige) !important;
+            color: #000 !important;
+        }
+
+        .navbar-toggler {
+            border: none !important;
+            padding: 0 !important;
+        }
+
+        .navbar-toggler-icon {
+            background-image: none !important;
+        }
+
+        .navbar-toggler-icon::before {
+            content: "\f479" !important;
+            font-family: "bootstrap-icons" !important;
+            font-size: 24px !important;
+            color: #fff !important;
+        }
+
+        /* Footer INPROV Style */
+        .footer-inprov {
+            background: var(--negro) !important;
+            border-top: 1px solid var(--borde) !important;
+            padding: 60px 0 30px;
+        }
+
+        .footer-inprov h5, .footer-inprov h6 {
+            color: #777 !important;
+            font-size: 11px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .footer-inprov ul { list-style: none; padding: 0; }
+
+        .footer-inprov ul li { margin-bottom: 10px; }
+
+        .footer-inprov a {
+            color: #fff !important;
+            font-size: 12px !important;
+            transition: color 0.3s !important;
+        }
+
+        .footer-inprov a:hover { color: var(--beige) !important; }
+
+        .footer-copyright {
+            color: #666 !important;
+            font-size: 10px !important;
+            letter-spacing: 1px !important;
+            text-transform: uppercase;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--borde);
+            color: #fff !important;
+            margin-right: 10px;
+            transition: all 0.3s !important;
+        }
+
+        .social-links a:hover {
+            background: var(--beige);
+            border-color: var(--beige);
+            color: #000 !important;
+        }
+
+        /* Dropdown dark style */
+        .dropdown-menu {
+            background: var(--negro-card);
+            border: 1px solid var(--borde);
+            border-radius: 0;
+        }
+        .dropdown-item {
+            color: var(--gris-texto);
+        }
+        .dropdown-item:hover {
+            background: var(--gris-oscuro);
+            color: var(--beige);
+        }
+    </style>
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-inprov" id="mainNav">
         <div class="container">
             <a class="navbar-brand" href="/">
-                <img src="/img/logo.webp" alt="ModoFit" height="40" class="d-inline-block align-text-top">
-                <span class="ms-2 fw-bold">ModoFit</span>
+                <span>MODO</span><span class="text-beige">FIT</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+                <ul class="navbar-nav mx-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">Inicio</a>
+                        <a class="nav-link" href="/">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/servicios">Servicios</a>
+                        <a class="nav-link" href="#nosotros">Nosotros</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#planes">Planes</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/pedidos">Comprar</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/nosotros">Nosotros</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/contacto">Contacto</a>
-                    </li>
                 </ul>
                 <ul class="navbar-nav">
-                    <!-- Usuario logueado (se muestra/oculta con JS) -->
                     <li class="nav-item dropdown" id="user-menu" style="display: none;">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle btn-cuenta" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle"></i> <span id="user-name"></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/dashboard"><i class="bi bi-speedometer2"></i> Mi Dashboard</a></li>
-                            <li><a class="dropdown-item" href="/dashboard/perfil"><i class="bi bi-person"></i> Mi Perfil</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/auth/logout"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a></li>
+                            <li><a class="dropdown-item" href="/dashboard"><i class="bi bi-speedometer2 me-2"></i>Mi Dashboard</a></li>
+                            <li><a class="dropdown-item" href="/dashboard/perfil"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
+                            <li><hr class="dropdown-divider" style="border-color: var(--borde);"></li>
+                            <li><a class="dropdown-item text-danger" href="/auth/logout"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
                         </ul>
                     </li>
-                    <!-- Usuario no logueado (se muestra/oculta con JS) -->
                     <li class="nav-item" id="login-btn">
-                        <a class="nav-link" href="/auth/login"><i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión</a>
-                    </li>
-                    <li class="nav-item" id="register-btn">
-                        <a class="btn btn-primary ms-2" href="/auth/registro">Registrarse</a>
-                    </li>
-                    <li class="nav-item ms-2">
-                        <a class="btn btn-outline-light position-relative" href="/pedidos/carrito">
-                            <i class="bi bi-cart3"></i>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count" style="display: none;">0</span>
-                        </a>
+                        <a class="btn-cuenta" href="/auth/login">Mi Cuenta</a>
                     </li>
                 </ul>
             </div>
@@ -79,70 +252,83 @@
     </nav>
 
     <!-- Main Content -->
-    <main style="margin-top: 76px;">
+    <main>
         {{{body}}}
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-light py-5 mt-5">
+    <footer class="footer-inprov">
         <div class="container">
             <div class="row">
-                <div class="col-md-4 mb-4">
-                    <h5 class="fw-bold mb-3">
-                        <img src="/img/logo.webp" alt="ModoFit" height="30"> ModoFit
-                    </h5>
-                    <p class="text-muted">Tu gimnasio de confianza. Transforma tu cuerpo, transforma tu vida.</p>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <a class="navbar-brand mb-3 d-block" href="/">
+                        <span style="color:#fff">MODO</span><span class="text-beige">FIT</span>
+                    </a>
+                    <p class="mb-4" style="font-size: 12px;">Centro boutique de entrenamiento personalizado</p>
                     <div class="social-links">
-                        <a href="#" class="text-light me-3"><i class="bi bi-facebook fs-4"></i></a>
-                        <a href="#" class="text-light me-3"><i class="bi bi-instagram fs-4"></i></a>
-                        <a href="#" class="text-light me-3"><i class="bi bi-tiktok fs-4"></i></a>
-                        <a href="#" class="text-light"><i class="bi bi-whatsapp fs-4"></i></a>
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                        <a href="#"><i class="bi bi-whatsapp"></i></a>
                     </div>
                 </div>
-                <div class="col-md-2 mb-4">
-                    <h6 class="fw-bold mb-3">Enlaces</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><a href="/" class="text-muted text-decoration-none">Inicio</a></li>
-                        <li class="mb-2"><a href="/servicios" class="text-muted text-decoration-none">Servicios</a></li>
-                        <li class="mb-2"><a href="/pedidos" class="text-muted text-decoration-none">Comprar</a></li>
-                        <li class="mb-2"><a href="/contacto" class="text-muted text-decoration-none">Contacto</a></li>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6>MODOFIT</h6>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="#nosotros">Nosotros</a></li>
+                        <li><a href="#planes">Planes</a></li>
                     </ul>
                 </div>
-                <div class="col-md-3 mb-4">
-                    <h6 class="fw-bold mb-3">Horarios</h6>
-                    <ul class="list-unstyled text-muted">
-                        <li class="mb-2"><i class="bi bi-clock"></i> Lun - Vie: 5:00 AM - 11:00 PM</li>
-                        <li class="mb-2"><i class="bi bi-clock"></i> Sábados: 6:00 AM - 8:00 PM</li>
-                        <li class="mb-2"><i class="bi bi-clock"></i> Domingos: 7:00 AM - 2:00 PM</li>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6>INFORMACIÓN</h6>
+                    <ul>
+                        <li><a href="/contacto">Contacto</a></li>
+                        <li><a href="#">FAQ</a></li>
                     </ul>
                 </div>
-                <div class="col-md-3 mb-4">
-                    <h6 class="fw-bold mb-3">Contacto</h6>
-                    <ul class="list-unstyled text-muted">
-                        <li class="mb-2"><i class="bi bi-geo-alt"></i> Av. Principal 123, Lima</li>
-                        <li class="mb-2"><i class="bi bi-telephone"></i> +51 963 061 209</li>
-                        <li class="mb-2"><i class="bi bi-envelope"></i> info@modofit.pe</li>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6>LEGAL</h6>
+                    <ul>
+                        <li><a href="#">Política de Privacidad</a></li>
+                        <li><a href="#">Términos y Condiciones</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h6>CONTACTO</h6>
+                    <ul style="color: #fff; font-size: 12px;">
+                        <li><i class="bi bi-geo-alt me-2" style="color: var(--beige);"></i>Av. Principal 123, Lima</li>
+                        <li><i class="bi bi-telephone me-2" style="color: var(--beige);"></i>+51 963 061 209</li>
+                        <li><i class="bi bi-envelope me-2" style="color: var(--beige);"></i>info@modofit.pe</li>
                     </ul>
                 </div>
             </div>
-            <hr class="my-4">
-            <div class="row">
-                <div class="col-md-6">
-                    <p class="text-muted mb-0">&copy; 2025 ModoFit. Todos los derechos reservados.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <a href="#" class="text-muted text-decoration-none me-3">Términos de uso</a>
-                    <a href="#" class="text-muted text-decoration-none">Política de privacidad</a>
-                </div>
+            <hr style="border-color: var(--borde); margin: 30px 0;">
+            <div class="text-center">
+                <p class="footer-copyright mb-0">©2024 MODOFIT - TODOS LOS DERECHOS RESERVADOS</p>
             </div>
         </div>
     </footer>
 
+    <!-- WhatsApp Button -->
+    <a href="https://api.whatsapp.com/send/?phone=51963061209" class="whatsapp-btn" target="_blank" style="position: fixed; bottom: 20px; right: 20px; background: #25D366; color: #fff; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 999; transition: transform 0.3s;">
+        <i class="bi bi-whatsapp"></i>
+    </a>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Custom JS -->
     <script src="/js/main.js"></script>
+    
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const nav = document.getElementById('mainNav');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+    </script>
 </body>
 </html>

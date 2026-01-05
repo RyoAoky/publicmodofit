@@ -42,7 +42,7 @@ async function cargarMembresias() {
                                     <td><strong>${m.tipomem}</strong></td>
                                     <td>${formatearFecha(m.fecinimem)}</td>
                                     <td>${formatearFecha(m.fecfinmem)}</td>
-                                    <td>${getEstadoMembresia(m.estmem)}</td>
+                                    <td>${getEstadoMembresia(m.estmem, m.estmem_cod)}</td>
                                     <td>S/ ${parseFloat(m.premem).toFixed(2)}</td>
                                 </tr>
                             `).join('')}
@@ -67,13 +67,26 @@ async function cargarMembresias() {
     }
 }
 
-function getEstadoMembresia(estado) {
-    switch(estado) {
-        case 'A': return '<span class="badge bg-success">Activa</span>';
-        case 'V': return '<span class="badge bg-danger">Vencida</span>';
-        case 'C': return '<span class="badge bg-secondary">Cancelada</span>';
-        default: return '<span class="badge bg-secondary">-</span>';
+function getEstadoMembresia(descripcion, codigo) {
+    let color = 'secondary';
+    // Usamos el código para determinar el color, si está disponible
+    if (codigo) {
+        switch(codigo) {
+            case 'S':
+            case 'A': color = 'success'; break;
+            case 'V': color = 'danger'; break;
+            case 'C': color = 'secondary'; break;
+            case 'P': color = 'warning text-dark'; break;
+        }
+    } else {
+        // Fallback básico basado en texto si no hay código (opcional)
+        const descUpper = (descripcion || '').toUpperCase();
+        if (descUpper.includes('ACTIVA')) color = 'success';
+        else if (descUpper.includes('VENCIDA')) color = 'danger';
+        else if (descUpper.includes('PENDIENTE')) color = 'warning text-dark';
     }
+    
+    return `<span class="badge bg-${color}">${descripcion || '-'}</span>`;
 }
 
 function formatearFecha(fecha) {

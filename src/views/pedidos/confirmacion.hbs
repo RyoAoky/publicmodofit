@@ -1,39 +1,187 @@
-<section class="py-5">
+<style>
+    .section-confirmation {
+        padding: 140px 0 100px;
+        background: var(--negro);
+        min-height: 100vh;
+    }
+
+    .confirmation-card {
+        background: var(--negro-card);
+        border: 1px solid var(--borde);
+        max-width: 600px;
+        margin: 0 auto;
+        text-align: center;
+        padding: 60px 40px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .confirmation-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: #28a745;
+    }
+
+    .success-icon {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #28a745, #20c997);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px;
+    }
+
+    .success-icon i {
+        font-size: 48px;
+        color: #fff;
+    }
+
+    .confirmation-card h2 {
+        color: #28a745;
+        font-size: 32px;
+        margin-bottom: 15px;
+    }
+
+    .confirmation-card .lead {
+        color: var(--gris-texto);
+        font-size: 16px;
+        margin-bottom: 35px;
+    }
+
+    .order-details {
+        background: var(--gris-oscuro);
+        border: 1px solid var(--borde);
+        padding: 30px;
+        margin-bottom: 30px;
+        text-align: left;
+    }
+
+    .order-details h5 {
+        color: #fff;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--borde);
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-row span {
+        color: var(--gris-texto);
+    }
+
+    .detail-row strong {
+        color: #fff;
+    }
+
+    .detail-row.total strong {
+        color: var(--beige);
+        font-size: 20px;
+    }
+
+    .email-notice {
+        color: var(--gris-texto);
+        font-size: 14px;
+        margin-bottom: 30px;
+    }
+
+    .email-notice i {
+        color: var(--beige);
+    }
+
+    .btn-group-confirmation {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-home {
+        background: var(--beige);
+        border: 1px solid var(--beige);
+        color: #000;
+        font-family: "Poppins", sans-serif;
+        font-weight: 700;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 14px 28px;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .btn-home:hover {
+        background: transparent;
+        color: var(--beige);
+    }
+
+    .btn-dashboard {
+        background: transparent;
+        border: 1px solid var(--borde);
+        color: var(--gris-texto);
+        font-family: "Poppins", sans-serif;
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 14px 28px;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .btn-dashboard:hover {
+        border-color: var(--beige);
+        color: var(--beige);
+    }
+
+    .spinner-border {
+        color: var(--beige);
+    }
+</style>
+
+<section class="section-confirmation">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
-                <div class="card border-0 shadow-sm text-center">
-                    <div class="card-body py-5">
-                        <div class="mb-4">
-                            <div class="bg-success text-light rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
-                                <i class="bi bi-check-lg fs-1"></i>
-                            </div>
-                        </div>
-                        <h2 class="fw-bold text-success mb-3">¡Pago Exitoso!</h2>
-                        <p class="lead text-muted mb-4">
-                            Gracias por tu compra. Tu pedido ha sido procesado exitosamente.
-                        </p>
-                        
-                        <div class="bg-light rounded p-4 mb-4" id="pedido-detalle">
-                            <div class="text-center py-3">
-                                <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                    <span class="visually-hidden">Cargando...</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <p class="text-muted mb-4">
-                            <i class="bi bi-envelope me-2"></i>
-                            Te hemos enviado los detalles a tu correo electrónico.
-                        </p>
-                        
-                        <div class="d-flex gap-3 justify-content-center" id="acciones-container">
-                            <a href="/" class="btn btn-primary">
-                                <i class="bi bi-house me-2"></i>Volver al Inicio
-                            </a>
-                        </div>
+        <div class="confirmation-card">
+            <div class="success-icon">
+                <i class="bi bi-check-lg"></i>
+            </div>
+            
+            <h2>¡Pago Exitoso!</h2>
+            <p class="lead">Gracias por tu compra. Tu pedido ha sido procesado exitosamente.</p>
+            
+            <div class="order-details" id="pedido-detalle">
+                <div style="text-align: center; padding: 20px;">
+                    <div class="spinner-border spinner-border-sm" role="status">
+                        <span class="visually-hidden">Cargando...</span>
                     </div>
                 </div>
+            </div>
+            
+            <p class="email-notice">
+                <i class="bi bi-envelope me-2"></i>
+                Te hemos enviado los detalles a tu correo electrónico.
+            </p>
+            
+            <div class="btn-group-confirmation" id="acciones-container">
+                <a href="/" class="btn-home">
+                    <i class="bi bi-house me-2"></i>Volver al Inicio
+                </a>
             </div>
         </div>
     </div>
@@ -41,7 +189,6 @@
 
 <script>
 async function cargarConfirmacion() {
-    // Obtener ID del pedido de la URL
     const urlParams = new URLSearchParams(window.location.search);
     const idPedido = urlParams.get('id');
     
@@ -49,7 +196,7 @@ async function cargarConfirmacion() {
     const accionesContainer = document.getElementById('acciones-container');
     
     if (!idPedido) {
-        container.innerHTML = '<p class="text-muted">Información del pedido no disponible</p>';
+        container.innerHTML = '<p style="color: var(--gris-texto); text-align: center;">Información del pedido no disponible</p>';
         return;
     }
     
@@ -62,45 +209,44 @@ async function cargarConfirmacion() {
             const total = data.data.reduce((sum, d) => sum + (parseFloat(d.predp) * d.cantdp), 0);
             
             container.innerHTML = `
-                <h5 class="mb-3">Detalles del Pedido</h5>
-                <div class="d-flex justify-content-between mb-2">
+                <h5>Detalles del Pedido</h5>
+                <div class="detail-row">
                     <span>N° de Pedido:</span>
                     <strong>#${idPedido}</strong>
                 </div>
-                <div class="d-flex justify-content-between mb-2">
+                <div class="detail-row">
                     <span>Fecha:</span>
                     <strong>${new Date().toLocaleDateString('es-PE')}</strong>
                 </div>
-                <div class="d-flex justify-content-between mb-2">
+                <div class="detail-row total">
                     <span>Total:</span>
-                    <strong class="text-primary">S/ ${total.toFixed(2)}</strong>
+                    <strong>S/ ${total.toFixed(2)}</strong>
                 </div>
-                <div class="d-flex justify-content-between">
+                <div class="detail-row">
                     <span>Método de Pago:</span>
                     <strong>TARJETA</strong>
                 </div>
             `;
             
-            // Verificar si hay usuario logueado
             const userResponse = await fetch('/auth/api/me');
             const userData = await userResponse.json();
             
             if (userData.success && userData.user) {
                 accionesContainer.innerHTML = `
-                    <a href="/" class="btn btn-primary">
+                    <a href="/" class="btn-home">
                         <i class="bi bi-house me-2"></i>Volver al Inicio
                     </a>
-                    <a href="/dashboard" class="btn btn-outline-primary">
+                    <a href="/dashboard" class="btn-dashboard">
                         <i class="bi bi-speedometer2 me-2"></i>Mi Dashboard
                     </a>
                 `;
             }
         } else {
-            container.innerHTML = '<p class="text-muted">Pedido procesado correctamente</p>';
+            container.innerHTML = '<p style="color: var(--gris-texto); text-align: center;">Pedido procesado correctamente</p>';
         }
     } catch (error) {
-        console.error('Error al cargar confirmación:', error);
-        container.innerHTML = '<p class="text-muted">Pedido procesado correctamente</p>';
+        console.error('Error:', error);
+        container.innerHTML = '<p style="color: var(--gris-texto); text-align: center;">Pedido procesado correctamente</p>';
     }
 }
 

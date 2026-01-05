@@ -1,0 +1,505 @@
+<style>
+    /* Estilos específicos para la página de inicio */
+    
+    /* --- HERO VIDEO SECTION --- */
+    .section-video {
+        height: 100vh;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .bg-video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .bg-video video {
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+    }
+
+    .bg-video::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.01) 100%);
+        z-index: 1;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        padding: 0 20px;
+    }
+
+    .hero-content h2 {
+        color: #fff;
+        font-size: 50px;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .hero-content h4 {
+        color: #fff;
+        font-size: 18px;
+        font-weight: 300;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .iconos-titulo {
+        margin: 20px 0;
+        text-align: center;
+    }
+
+    .iconos-titulo i {
+        color: var(--beige);
+        font-size: 4px;
+        margin: 0 5px;
+    }
+
+    .icono-move {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #fff;
+        font-size: 32px;
+        animation: bounce 0.9s infinite linear;
+        z-index: 2;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateX(-50%) translateY(0); }
+        50% { transform: translateX(-50%) translateY(-5px); }
+    }
+
+    /* --- SECCIÓN NOSOTROS --- */
+    .section-nosotros {
+        padding: 60px 0;
+        background: var(--negro);
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 40px;
+    }
+
+    .col-6 {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .col-6 img {
+        width: 100%;
+        height: auto;
+    }
+
+    .title-section h3 {
+        font-size: 10px;
+        color: #fff !important;
+        letter-spacing: 4px;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+    }
+
+    .title-section h2 {
+        font-size: 32px;
+        margin-bottom: 10px;
+        line-height: 1.2;
+    }
+
+    .btn-page {
+        display: inline-block;
+        border: 1px solid var(--beige);
+        background: var(--beige);
+        color: #000;
+        padding: 13px 26px;
+        font-family: "Poppins", sans-serif;
+        font-weight: 800;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 20px;
+        transition: all 0.3s;
+        text-decoration: none;
+    }
+
+    .btn-page:hover {
+        background: transparent;
+        color: var(--beige);
+    }
+
+    /* --- SECCIÓN PLANES --- */
+    .section-planes {
+        padding: 80px 0;
+        background: var(--negro);
+    }
+
+    .section-planes .title-section {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .planes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 30px;
+    }
+
+    .plan-card {
+        background: #0a0a0a;
+        border: 1px solid #222;
+        padding: 40px 30px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .plan-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: var(--beige);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+        transform-origin: left;
+    }
+
+    .plan-card:hover {
+        border-color: var(--beige);
+        transform: translateY(-5px);
+    }
+
+    .plan-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .plan-card h4 {
+        color: #fff;
+        font-size: 20px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    .plan-badge {
+        display: inline-block;
+        background: #1a1a1a;
+        border: 1px solid #333;
+        padding: 5px 12px;
+        font-size: 11px;
+        text-transform: uppercase;
+        color: var(--gris-texto);
+        margin-bottom: 20px;
+    }
+
+    .plan-price {
+        margin-bottom: 20px;
+    }
+
+    .plan-price h2 {
+        font-family: "Poppins", sans-serif;
+        font-size: 48px;
+        color: var(--beige);
+        line-height: 1;
+    }
+
+    .plan-price h2 span {
+        font-size: 20px;
+        vertical-align: top;
+    }
+
+    .plan-price p {
+        font-size: 12px;
+        color: var(--gris-texto);
+    }
+
+    .plan-features {
+        list-style: none;
+        margin-bottom: 30px;
+    }
+
+    .plan-features li {
+        padding: 8px 0;
+        color: var(--gris-texto);
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .plan-features li i {
+        color: var(--beige);
+        font-size: 12px;
+    }
+
+    .plan-features li.destacado {
+        color: #fff;
+        font-weight: 600;
+        margin-top: 10px;
+    }
+
+    .btn-plan {
+        display: block;
+        width: 100%;
+        text-align: center;
+        background: var(--beige);
+        color: #000;
+        padding: 15px 20px;
+        font-family: "Poppins", sans-serif;
+        font-weight: 800;
+        font-size: 13px;
+        text-transform: uppercase;
+        border: 1px solid var(--beige);
+        transition: all 0.3s;
+        text-decoration: none;
+    }
+
+    .btn-plan:hover {
+        background: transparent;
+        color: var(--beige);
+    }
+
+    .planes-empty {
+        text-align: center;
+        padding: 60px 20px;
+        grid-column: 1 / -1;
+    }
+
+    .planes-empty h3 {
+        color: var(--gris-texto);
+        font-style: italic;
+    }
+
+    /* --- SECCIÓN APP --- */
+    .section-app {
+        padding: 80px 0;
+        background: #000;
+    }
+
+    .section-app h2 {
+        font-size: 36px;
+        color: #fff;
+        margin-bottom: 20px;
+    }
+
+    .section-app h2 span {
+        color: var(--beige);
+    }
+
+    .section-app p {
+        font-size: 15px;
+        margin-bottom: 30px;
+    }
+
+    .btn-store {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: transparent;
+        border: 1px solid #fff;
+        color: #fff;
+        padding: 12px 20px;
+        font-family: "Poppins", sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        transition: all 0.3s;
+        text-decoration: none;
+    }
+
+    .btn-store:hover {
+        background: #fff;
+        color: #000;
+    }
+
+    .section-app img {
+        max-height: 400px;
+        filter: grayscale(100%);
+        opacity: 0.75;
+    }
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 991px) {
+        .hero-content h2 {
+            font-size: 36px;
+        }
+
+        .hero-content h4 {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .row {
+            flex-direction: column;
+        }
+
+        .col-6 {
+            width: 100%;
+        }
+
+        .title-section h2 {
+            font-size: 28px;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .section-video {
+            height: 73vh;
+        }
+
+        .bg-video video {
+            height: 73vh;
+        }
+
+        .icono-move {
+            bottom: 10px;
+        }
+
+        .planes-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+{{!-- HERO VIDEO --}}
+<section class="section-video">
+    <div class="bg-video">
+        <video src="https://assets.mixkit.co/videos/preview/mixkit-athlete-working-out-with-heavy-ropes-in-the-gym-43758-large.mp4" autoplay loop playsinline muted></video>
+    </div>
+    
+    <div class="hero-content">
+        <h2>ENTRENAMIENTO PERSONALIZADO</h2>
+        <div class="iconos-titulo">
+            <i class="bi bi-circle-fill"></i>
+            <i class="bi bi-circle-fill"></i>
+            <i class="bi bi-circle-fill"></i>
+        </div>
+        <h4>La mejor experiencia de entrenamiento acorde a tus objetivos</h4>
+    </div>
+    
+    <div class="icono-move">
+        <i class="bi bi-chevron-down"></i>
+    </div>
+</section>
+
+{{!-- SECCIÓN NOSOTROS --}}
+<section id="nosotros" class="section-nosotros">
+    <div class="container">
+        <div class="row">
+            <div class="col-6">
+                <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1470&auto=format&fit=crop" alt="MODOFIT Studio">
+            </div>
+            <div class="col-6">
+                <div class="title-section">
+                    <h3>NOSOTROS</h3>
+                    <h2>¡CONOCE<br>MODOFIT STUDIO!</h2>
+                </div>
+                <div class="iconos-titulo" style="text-align: left;">
+                    <i class="bi bi-circle-fill"></i>
+                    <i class="bi bi-circle-fill"></i>
+                    <i class="bi bi-circle-fill"></i>
+                </div>
+                <p>
+                    En nuestro exclusivo centro boutique, te ofrecemos un entrenamiento personalizado de primera clase. 
+                    Ya seas un atleta experimentado o estés dando tus primeros pasos en el mundo del fitness, 
+                    estamos aquí para guiarte hacia el éxito de manera efectiva y saludable.
+                </p>
+                <p><strong>¡Únete a nosotros y haz de cada sesión un paso más hacia tu mejor versión!</strong></p>
+                <a href="#planes" class="btn-page">VER PLANES</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{!-- SECCIÓN PLANES --}}
+<section id="planes" class="section-planes">
+    <div class="container">
+        <div class="title-section">
+            <h3>PLANES</h3>
+            <h2>ELIGE TU CAMINO</h2>
+            <div class="iconos-titulo">
+                <i class="bi bi-circle-fill"></i>
+                <i class="bi bi-circle-fill"></i>
+                <i class="bi bi-circle-fill"></i>
+            </div>
+            <p style="max-width: 600px; margin: 0 auto;">Sin contratos forzosos. Cancela cuando quieras. Resultados garantizados si sigues el plan.</p>
+        </div>
+
+        <div class="planes-grid">
+            {{#if planes.length}}
+                {{#each planes}}
+                <div class="plan-card">
+                    <h4>{{#if nomplanext}}{{nomplanext}}{{else}}{{despro}}{{/if}}</h4>
+                    <span class="plan-badge">{{frecuenciaTexto frecuencianum frecuenciaunidad}}</span>
+                    
+                    <div class="plan-price">
+                        <h2><span>{{moneda}}</span>{{formatPrecio precio}}</h2>
+                        <p>{{despro}}</p>
+                    </div>
+
+                    <ul class="plan-features">
+                        {{#if durpro}}
+                        <li><i class="bi bi-check2"></i> Duración: {{durpro}} días</li>
+                        {{/if}}
+                        <li><i class="bi bi-check2"></i> Acceso App Móvil</li>
+                        <li><i class="bi bi-check2"></i> Soporte 24/7</li>
+                        <li><i class="bi bi-check2"></i> Video-guías HD</li>
+                        {{#if diasprueba}}
+                        <li class="destacado"><i class="bi bi-gift"></i> {{diasprueba}} Días de Prueba</li>
+                        {{/if}}
+                    </ul>
+
+                    <a href="/pedidos" class="btn-plan">SELECCIONAR</a>
+                </div>
+                {{/each}}
+            {{else}}
+                <div class="planes-empty">
+                    <h3>CARGANDO PLANES DISPONIBLES...</h3>
+                </div>
+            {{/if}}
+        </div>
+    </div>
+</section>
+
+{{!-- SECCIÓN APP --}}
+<section class="section-app">
+    <div class="container">
+        <div class="row">
+            <div class="col-6">
+                <h2>TU ENTRENADOR<br>EN TU <span>BOLSILLO</span></h2>
+                <p>No necesitas adivinar qué hacer. Nuestra app te dice exactamente qué ejercicios, cuántas series y con qué peso trabajar.</p>
+                <div>
+                    <a href="#" class="btn-store"><i class="bi bi-apple"></i> APP STORE</a>
+                    <a href="#" class="btn-store"><i class="bi bi-google-play"></i> PLAY STORE</a>
+                </div>
+            </div>
+            <div class="col-6" style="text-align: center;">
+                <img src="https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?q=80&w=1000&auto=format&fit=crop" alt="App Preview">
+            </div>
+        </div>
+    </div>
+</section>

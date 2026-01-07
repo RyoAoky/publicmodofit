@@ -2,8 +2,13 @@
    ModoFit - Estilos Principales
    ================================ */
 
+/* ================================
+   1. CSS Variables (:root)
+   ================================ */
+
 :root {
-    --primary-color: #0d6efd;
+    /* Colores base - ModoFit Brand */
+    --primary-color: #e4d09b;
     --secondary-color: #6c757d;
     --success-color: #198754;
     --danger-color: #dc3545;
@@ -11,134 +16,83 @@
     --info-color: #0dcaf0;
     --dark-color: #212529;
     --light-color: #f8f9fa;
+    
+    /* Colores de tema oscuro ModoFit - Nombres semánticos */
+    --bg-dark: #111;
+    --bg-card: #0a0a0a;
+    --text-muted: #BCBCBC;
+    --bg-surface: #1a1a1a;
+    --border-color: #222;
+    --accent-color: #e4d09b;
+    
+    /* Variaciones calculadas del color primario */
+    --primary-color-hover: color-mix(in srgb, var(--primary-color) 85%, black);
+    --primary-color-light: color-mix(in srgb, var(--primary-color) 15%, white);
+    --primary-color-transparent: color-mix(in srgb, var(--primary-color) 10%, transparent);
+    
+    /* Variaciones calculadas del color secundario */
+    --secondary-color-hover: color-mix(in srgb, var(--secondary-color) 85%, black);
+    --secondary-color-light: color-mix(in srgb, var(--secondary-color) 15%, white);
+    --secondary-color-transparent: color-mix(in srgb, var(--secondary-color) 10%, transparent);
 }
 
+/* ================================
+   2. Base Styles (reset, body, typography)
+   ================================ */
+
+/* Reset */
 * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
 }
 
+/* Body - Default light theme */
 body {
     background-color: #f8f9fa;
 }
 
-/* Navbar */
-.navbar {
-    transition: all 0.3s ease;
+/* Body - ModoFit dark theme (public pages) */
+body.modofit-dark {
+    background-color: var(--bg-dark);
+    color: var(--text-muted);
+    font-family: "Montserrat", sans-serif;
+    font-weight: 300;
+    font-size: 13px;
 }
 
-.navbar-brand img {
-    transition: transform 0.3s ease;
+/* Typography - ModoFit dark theme */
+body.modofit-dark h1, 
+body.modofit-dark h2, 
+body.modofit-dark h3, 
+body.modofit-dark h4, 
+body.modofit-dark h5, 
+body.modofit-dark h6 {
+    font-family: "Poppins", sans-serif;
+    letter-spacing: -0.2px;
+    color: var(--accent-color);
 }
 
-.navbar-brand:hover img {
-    transform: scale(1.1);
+body.modofit-dark p {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.8;
 }
 
-/* Hero Section */
-.hero-section {
-    min-height: 80vh;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    position: relative;
+body.modofit-dark a { 
+    text-decoration: none; 
+    color: var(--accent-color); 
 }
 
-.hero-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('/img/hero-pattern.png');
-    opacity: 0.1;
+/* Links - Default */
+a {
+    color: var(--primary-color);
 }
 
-.min-vh-75 {
-    min-height: 75vh;
-}
-
-/* Feature Icons */
-.feature-icon {
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Cards */
-.card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border-radius: 12px;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Buttons */
-.btn {
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
-    border: none;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
-}
-
-.btn-lg {
-    padding: 12px 30px;
-    font-size: 1.1rem;
-}
-
-/* Forms */
-.form-control, .form-select {
-    border-radius: 8px;
-    padding: 12px 16px;
-    border: 1px solid #dee2e6;
-    transition: all 0.3s ease;
-}
-
-.form-control:focus, .form-select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-}
-
-.input-group-text {
-    border-radius: 8px 0 0 8px;
-    background-color: #f8f9fa;
-}
-
-/* Footer */
-footer a {
-    transition: color 0.3s ease;
-}
-
-footer a:hover {
-    color: var(--primary-color) !important;
-}
-
-/* Animations */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.animate-fadeInUp {
-    animation: fadeInUp 0.6s ease-out;
+a:hover {
+    color: var(--primary-color-hover);
 }
 
 /* Custom Scrollbar */
@@ -159,47 +113,306 @@ footer a:hover {
     background: #555;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .hero-section {
-        min-height: 60vh;
-    }
-    
-    .display-4 {
-        font-size: 2rem;
-    }
-    
-    .btn-lg {
-        padding: 10px 20px;
-        font-size: 1rem;
-    }
+/* ================================
+   3. Layout Components (navbar, footer)
+   ================================ */
+
+/* Navbar */
+.navbar {
+    transition: all 0.3s ease;
 }
 
-/* Loading Spinner */
-.spinner-overlay {
+.navbar-brand img {
+    transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover img {
+    transform: scale(1.1);
+}
+
+/* Navbar ModoFit Style */
+.navbar-modofit {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding: 20px 0;
+    transition: all 0.3s ease;
     position: fixed;
+    width: 100%;
     top: 0;
+    z-index: 1050;
+}
+
+.navbar-modofit.scrolled {
+    background: var(--bg-dark) !important;
+    padding: 15px 0;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.5);
+}
+
+.navbar-modofit .navbar-brand {
+    font-family: "Poppins", sans-serif !important;
+    font-size: 1.8rem !important;
+    font-weight: 700 !important;
+    color: #fff !important;
+}
+
+.navbar-modofit .navbar-brand .text-accent { 
+    color: var(--accent-color) !important; 
+}
+
+.navbar-modofit .navbar-nav .nav-link {
+    color: #fff !important;
+    font-family: "Poppins", sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    margin: 0 15px !important;
+    transition: color 0.3s !important;
+    position: relative;
+}
+
+.navbar-modofit .navbar-nav .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.9);
-    display: flex;
+    width: 0;
+    height: 2px;
+    background: var(--accent-color);
+    transition: width 0.3s;
+}
+
+.navbar-modofit .navbar-nav .nav-link:hover::after { 
+    width: 100%; 
+}
+
+.navbar-modofit .navbar-nav .nav-link:hover { 
+    color: var(--accent-color) !important; 
+}
+
+.btn-cuenta {
+    border: 1px solid #fff !important;
+    color: #fff !important;
+    background: transparent !important;
+    padding: 8px 18px !important;
+    border-radius: 0 !important;
+    font-family: "Poppins", sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    transition: all 0.3s !important;
+}
+
+.btn-cuenta:hover {
+    background: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: #000 !important;
+}
+
+/* Override nav-link hover for btn-cuenta */
+.navbar-modofit .navbar-nav .btn-cuenta:hover {
+    color: #000 !important;
+}
+
+.navbar-modofit .navbar-toggler {
+    border: none !important;
+    padding: 0 !important;
+}
+
+.navbar-modofit .navbar-toggler-icon {
+    background-image: none !important;
+}
+
+.navbar-modofit .navbar-toggler-icon::before {
+    content: "\f479" !important;
+    font-family: "bootstrap-icons" !important;
+    font-size: 24px !important;
+    color: #fff !important;
+}
+
+/* Footer */
+footer a {
+    transition: color 0.3s ease;
+}
+
+footer a:hover {
+    color: var(--primary-color) !important;
+}
+
+/* Footer ModoFit Style */
+.footer-modofit {
+    background: var(--bg-dark) !important;
+    border-top: 1px solid var(--border-color) !important;
+    padding: 60px 0 30px;
+}
+
+.footer-modofit h5, 
+.footer-modofit h6 {
+    color: #777 !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+}
+
+.footer-modofit ul { 
+    list-style: none; 
+    padding: 0; 
+}
+
+.footer-modofit ul li { 
+    margin-bottom: 10px; 
+}
+
+.footer-modofit a {
+    color: #fff !important;
+    font-size: 12px !important;
+    transition: color 0.3s !important;
+}
+
+.footer-modofit a:hover { 
+    color: var(--accent-color) !important; 
+}
+
+.footer-copyright {
+    color: #666 !important;
+    font-size: 10px !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase;
+}
+
+.social-links a {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border-color);
+    color: #fff !important;
+    margin-right: 10px;
+    transition: all 0.3s !important;
 }
 
-/* Toast notifications */
-.toast-container {
-    position: fixed;
-    top: 100px;
-    right: 20px;
-    z-index: 9999;
+.social-links a:hover {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--bg-dark) !important;
+}
+
+/* ================================
+   4. Common Components (buttons, cards, forms, alerts, tables)
+   ================================ */
+
+/* Buttons */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-hover) 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-color-hover) 0%, color-mix(in srgb, var(--primary-color) 75%, black) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px var(--primary-color-transparent);
+}
+
+.btn-lg {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+}
+
+/* Cards */
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 12px;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* Pricing cards hover effect */
 .card.border-primary {
     transform: scale(1.02);
+}
+
+/* Forms */
+.form-control, .form-select {
+    border-radius: 8px;
+    padding: 12px 16px;
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-transparent);
+}
+
+.input-group-text {
+    border-radius: 8px 0 0 8px;
+    background-color: #f8f9fa;
+}
+
+/* Alert customization */
+.alert {
+    border-radius: 10px;
+    border: none;
+}
+
+/* Tables */
+.table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+/* Dropdown menu */
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+.dropdown-item {
+    padding: 10px 20px;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Dropdown dark style (ModoFit) */
+.navbar-modofit .dropdown-menu {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-modofit .dropdown-item {
+    color: var(--text-muted);
+}
+
+.navbar-modofit .dropdown-item:hover {
+    background: var(--bg-surface);
+    color: var(--accent-color);
+}
+
+/* Feature Icons */
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Social links */
@@ -223,32 +436,1141 @@ footer a:hover {
     font-size: 0.65rem;
 }
 
-/* Tables */
-.table th {
+/* Toast notifications */
+.toast-container {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    z-index: 9999;
+}
+
+/* Loading Spinner */
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+/* ================================
+   5. Page Sections - Legal Pages
+   ================================ */
+
+/* Page Section - Container for legal pages */
+.page-section {
+    padding: 120px 0 80px;
+    background: var(--bg-dark);
+    min-height: 100vh;
+}
+
+/* Page Title - Centered title for legal pages */
+.page-title {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.page-title h1 {
+    font-family: "Poppins", sans-serif;
+    font-size: 42px;
+    color: #fff;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.page-title h1 span {
+    color: var(--accent-color);
+}
+
+.page-title p {
+    color: var(--text-muted);
+    font-size: 16px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Section Block - Content block with accent border */
+.section-block {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 40px;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.section-block::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--accent-color);
+}
+
+.section-block h2 {
+    color: #fff;
+    font-size: 24px;
+    margin-bottom: 20px;
+    font-weight: 600;
+    font-family: "Poppins", sans-serif;
+}
+
+.section-block h3 {
+    color: var(--accent-color);
+    font-size: 18px;
+    margin: 25px 0 15px;
+    font-weight: 500;
+}
+
+.section-block p {
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 15px;
+}
+
+.section-block ul, 
+.section-block ol {
+    color: var(--text-muted);
+    padding-left: 25px;
+    margin-bottom: 20px;
+}
+
+.section-block li {
+    margin-bottom: 8px;
+    line-height: 1.7;
+}
+
+.section-block strong {
+    color: #fff;
+}
+
+.section-block em {
+    color: var(--accent-color);
+    font-style: normal;
+    font-weight: 500;
+}
+
+/* Page Content - Container for content blocks */
+.page-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Breadcrumb - Dark style for legal pages */
+.page-section .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 30px;
+}
+
+.page-section .breadcrumb-item a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.page-section .breadcrumb-item a:hover {
+    color: var(--accent-color);
+}
+
+.page-section .breadcrumb-item.active {
+    color: var(--accent-color);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.page-section .breadcrumb-item + .breadcrumb-item::before {
+    content: ">";
+    color: var(--text-muted);
+}
+
+/* Iconos Titulo - Decorative dots under titles */
+.iconos-titulo {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.iconos-titulo i {
+    color: var(--accent-color);
+    font-size: 5px;
+    margin: 0 6px;
+}
+
+/* Highlight Box - Important information box */
+.highlight-box {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--accent-color);
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.highlight-box h4 {
+    color: var(--accent-color);
+    font-size: 16px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.highlight-box p {
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+/* Contact Info - Contact information box */
+.contact-info {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    padding: 25px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+.contact-info h4 {
+    color: var(--accent-color);
+    font-size: 16px;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.contact-info p {
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.contact-info a {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+.contact-info a:hover {
+    text-decoration: underline;
+}
+
+/* Last Updated - Footer info for legal pages */
+.last-updated {
+    text-align: center;
+    margin-top: 50px;
+    padding: 20px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.last-updated strong {
+    color: var(--accent-color);
+}
+
+/* Category Section - FAQ category container */
+.category-section {
+    margin-bottom: 50px;
+}
+
+/* Category Title - FAQ category header */
+.category-title {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 25px 30px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.category-title::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--accent-color);
+}
+
+.category-title h3 {
+    color: #fff;
+    font-size: 18px;
+    margin: 0;
     font-weight: 600;
     text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 }
 
-/* Alert customization */
-.alert {
-    border-radius: 10px;
+/* FAQ Accordion - Accordion styles for FAQ page */
+.faq-accordion .accordion-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    margin-bottom: 15px;
+    border-radius: 0;
+}
+
+.faq-accordion .accordion-button {
+    background: transparent;
+    color: #fff;
     border: none;
+    padding: 20px 25px;
+    font-family: "Poppins", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: none;
+    border-radius: 0;
 }
 
-/* Dropdown menu */
-.dropdown-menu {
+.faq-accordion .accordion-button:not(.collapsed) {
+    background: var(--bg-surface);
+    color: var(--accent-color);
+    box-shadow: none;
+}
+
+.faq-accordion .accordion-button::after {
+    background-image: none;
+    content: "+";
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--accent-color);
+    transform: none;
+    transition: transform 0.3s ease;
+}
+
+.faq-accordion .accordion-button:not(.collapsed)::after {
+    content: "−";
+    transform: none;
+}
+
+.faq-accordion .accordion-body {
+    background: var(--bg-card);
+    color: var(--text-muted);
+    padding: 0 25px 25px;
+    border-top: 1px solid var(--border-color);
+    line-height: 1.7;
+}
+
+.faq-accordion .accordion-body p {
+    margin-bottom: 15px;
+}
+
+.faq-accordion .accordion-body ul {
+    padding-left: 20px;
+    margin-bottom: 15px;
+}
+
+.faq-accordion .accordion-body ul li {
+    margin-bottom: 8px;
+    color: var(--text-muted);
+}
+
+.faq-accordion .accordion-body strong {
+    color: #fff;
+}
+
+/* Contact CTA - Call to action section */
+.contact-cta {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 40px;
+    text-align: center;
+    margin-top: 60px;
+    position: relative;
+    overflow: hidden;
+}
+
+.contact-cta::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--accent-color);
+}
+
+.contact-cta h4 {
+    color: #fff;
+    font-size: 22px;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.contact-cta p {
+    color: var(--text-muted);
+    margin-bottom: 25px;
+}
+
+/* Button Contact - CTA button style */
+.btn-contact {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    color: var(--bg-dark);
+    padding: 14px 28px;
+    font-family: "Poppins", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.btn-contact:hover {
+    background: transparent;
+    color: var(--accent-color);
+}
+
+/* ================================
+   6. Page Sections - Home Page
+   ================================ */
+
+/* Hero Video Section */
+.section-hero {
+    height: 100vh;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.bg-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.bg-video video {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+}
+
+.bg-video::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.7) 100%);
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 0 20px;
+}
+
+.hero-content h1 {
+    color: #fff;
+    font-size: 56px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    letter-spacing: -1px;
+}
+
+.hero-content h4 {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 300;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+/* Scroll Indicator with bounce animation */
+.scroll-indicator {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 28px;
+    animation: bounce 1.5s infinite;
+    z-index: 2;
+    cursor: pointer;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-10px); }
+}
+
+/* Legacy Hero Section (generic) */
+.hero-section {
+    min-height: 80vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    position: relative;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('/img/hero-pattern.png');
+    opacity: 0.1;
+}
+
+/* Section Nosotros */
+.section-nosotros {
+    padding: 100px 0;
+    background: var(--bg-dark);
+}
+
+.nosotros-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 60px;
+}
+
+.nosotros-img {
+    flex: 1;
+    min-width: 300px;
+}
+
+.nosotros-img img {
+    width: 100%;
+    height: auto;
+    filter: grayscale(30%);
+    transition: filter 0.5s;
+}
+
+.nosotros-img:hover img {
+    filter: grayscale(0%);
+}
+
+.nosotros-content {
+    flex: 1;
+    min-width: 300px;
+}
+
+/* Title Section - Reusable section titles */
+.title-section h3 {
+    font-size: 11px;
+    color: #777 !important;
+    letter-spacing: 4px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.title-section h2 {
+    font-size: 38px;
+    color: #fff;
+    margin-bottom: 10px;
+    line-height: 1.1;
+}
+
+.title-section h2 span {
+    color: var(--accent-color);
+}
+
+/* Button Accent - Primary action button */
+.btn-accent {
+    display: inline-block;
+    border: 1px solid var(--accent-color);
+    background: var(--accent-color);
+    color: var(--bg-dark);
+    padding: 14px 32px;
+    font-family: "Poppins", sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 25px;
+    transition: all 0.3s;
+    text-decoration: none;
+}
+
+.btn-accent:hover {
+    background: transparent;
+    color: var(--accent-color);
+}
+
+/* Section Planes */
+.section-planes {
+    padding: 100px 0;
+    background: var(--bg-dark);
+}
+
+.section-planes .title-section {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.planes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+/* Plan Card */
+.plan-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 45px 35px;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.plan-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--accent-color);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+    transform-origin: left;
+}
+
+.plan-card:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-8px);
+}
+
+.plan-card:hover::before {
+    transform: scaleX(1);
+}
+
+.plan-card h4 {
+    color: #fff;
+    font-size: 22px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.plan-card h4 span {
+    color: var(--accent-color);
+    font-style: italic;
+    font-weight: 300;
+}
+
+/* Plan Badge */
+.plan-badge {
+    display: inline-block;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    padding: 6px 14px;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    margin-bottom: 25px;
+}
+
+/* Plan Price */
+.plan-price h2 {
+    font-family: "Poppins", sans-serif;
+    font-size: 52px;
+    color: var(--accent-color);
+    line-height: 1;
+}
+
+.plan-price h2 span {
+    font-size: 22px;
+    vertical-align: top;
+}
+
+.plan-price p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 5px;
+}
+
+/* Plan Features */
+.plan-features {
+    list-style: none;
+    margin: 30px 0;
+    padding: 0;
+}
+
+.plan-features li {
+    padding: 10px 0;
+    color: var(--text-muted);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.plan-features li:last-child {
+    border-bottom: none;
+}
+
+.plan-features li i {
+    color: var(--accent-color);
+    font-size: 14px;
+}
+
+.plan-features li.destacado {
+    color: #fff;
+    font-weight: 600;
+}
+
+/* Button Plan */
+.btn-plan {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: var(--accent-color) !important;
+    color: #000 !important;
+    padding: 16px 20px;
+    font-family: "Poppins", sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 1px solid var(--accent-color);
+    transition: all 0.3s;
+    text-decoration: none;
+}
+
+.btn-plan:hover {
+    background: transparent !important;
+    color: var(--accent-color) !important;
+}
+
+/* Section Ubicacion */
+.section-ubicacion {
+    padding: 100px 0;
+    background: #000;
+}
+
+.ubicacion-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 60px;
+}
+
+.ubicacion-content {
+    flex: 1;
+    min-width: 300px;
+}
+
+.ubicacion-content h2 {
+    font-size: 42px;
+    color: #fff;
+    margin-bottom: 20px;
+    line-height: 1.1;
+}
+
+.ubicacion-content h2 span {
+    color: var(--accent-color);
+}
+
+.ubicacion-info {
+    margin-top: 30px;
+}
+
+/* Info Item */
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    color: #fff;
+    font-size: 16px;
+}
+
+.info-item i {
+    color: var(--accent-color);
+    font-size: 20px;
+    width: 25px;
+}
+
+/* Button Direccion */
+.btn-direccion {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    color: var(--bg-dark);
+    padding: 14px 24px;
+    font-family: "Poppins", sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 20px;
+    transition: all 0.3s;
+    text-decoration: none;
+}
+
+.btn-direccion:hover {
+    background: transparent;
+    color: var(--accent-color);
+}
+
+/* Mapa Container */
+.mapa-container {
+    flex: 1;
+    min-width: 300px;
+    height: 400px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid var(--accent-color);
+}
+
+.mapa-container iframe {
+    width: 100%;
+    height: 100%;
     border: none;
-    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+    filter: grayscale(20%) contrast(1.1);
 }
 
-.dropdown-item {
-    padding: 10px 20px;
-    transition: all 0.2s ease;
+/* ================================
+   7. Utility Classes
+   ================================ */
+
+.min-vh-75 {
+    min-height: 75vh;
 }
 
-.dropdown-item:hover {
-    background-color: #f8f9fa;
+/* WhatsApp Floating Button */
+.whatsapp-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #25D366;
+    color: #fff;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 999;
+    transition: transform 0.3s;
+    text-decoration: none;
+}
+
+.whatsapp-btn:hover {
+    transform: scale(1.1);
+    color: #fff;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fadeInUp {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* ================================
+   8. Bootstrap Overrides
+   ================================ */
+
+/* Form check inputs (checkboxes, radios) */
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-check-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem var(--primary-color-transparent);
+}
+
+.form-check-input[type=checkbox]:indeterminate {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Button primary focus state */
+.btn-primary:focus {
+    background: linear-gradient(135deg, var(--primary-color-hover) 0%, color-mix(in srgb, var(--primary-color) 75%, black) 100%);
+    box-shadow: 0 0 0 0.25rem var(--primary-color-transparent);
+}
+
+/* Button outline primary */
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    color: #fff;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:focus {
+    box-shadow: 0 0 0 0.25rem var(--primary-color-transparent);
+}
+
+/* Link primary */
+.link-primary {
+    color: var(--primary-color);
+}
+
+.link-primary:hover,
+.link-primary:focus {
+    color: var(--primary-color-hover);
+}
+
+/* Border primary */
+.border-primary {
+    border-color: var(--primary-color) !important;
+}
+
+/* Text primary */
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+/* Background primary */
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+/* Nav pills */
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+    background-color: var(--primary-color);
+}
+
+/* List group active */
+.list-group-item.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Progress bar */
+.progress-bar {
+    background-color: var(--primary-color);
+}
+
+/* Pagination */
+.page-link {
+    color: var(--primary-color);
+}
+
+.page-link:hover {
+    color: var(--primary-color-hover);
+}
+
+.page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Dropdown active */
+.dropdown-item.active,
+.dropdown-item:active {
+    background-color: var(--primary-color);
+}
+
+/* ================================
+   9. Responsive / Media Queries
+   ================================ */
+
+/* ----- Tablet Breakpoint (max-width: 991px) ----- */
+@media (max-width: 991px) {
+    /* Navbar */
+    .navbar-modofit .navbar-nav .nav-link {
+        margin: 5px 0 !important;
+    }
+    
+    /* Home Page - Hero */
+    .hero-content h1 {
+        font-size: 38px;
+    }
+    
+    .hero-content h4 {
+        font-size: 13px;
+    }
+    
+    /* Home Page - Sections Layout */
+    .nosotros-row,
+    .ubicacion-row {
+        flex-direction: column;
+    }
+    
+    .title-section h2 {
+        font-size: 32px;
+    }
+    
+    /* Home Page - Ubicacion */
+    .ubicacion-content h2 {
+        font-size: 32px;
+    }
+    
+    .mapa-container {
+        height: 350px;
+    }
+}
+
+/* ----- Mobile Breakpoint (max-width: 768px) ----- */
+@media (max-width: 768px) {
+    /* Base / Generic */
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .btn-lg {
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+    
+    /* Navbar */
+    .navbar-modofit {
+        padding: 15px 0;
+    }
+    
+    .btn-cuenta {
+        margin-top: 10px;
+        width: 100%;
+        text-align: center;
+    }
+    
+    /* Footer */
+    .footer-modofit {
+        padding: 40px 0 20px;
+        text-align: center;
+    }
+    
+    .social-links {
+        justify-content: center;
+        margin-top: 20px;
+    }
+    
+    /* Home Page - Hero */
+    .section-hero {
+        height: 80vh;
+    }
+    
+    .hero-section {
+        min-height: 60vh;
+    }
+    
+    .hero-content h1 {
+        font-size: 32px;
+    }
+    
+    .hero-content h4 {
+        font-size: 12px;
+        letter-spacing: 2px;
+    }
+    
+    .scroll-indicator {
+        bottom: 20px;
+        font-size: 22px;
+    }
+    
+    /* Home Page - Nosotros */
+    .section-nosotros {
+        padding: 60px 0;
+    }
+    
+    .nosotros-row {
+        gap: 30px;
+    }
+    
+    .title-section h2 {
+        font-size: 28px;
+    }
+    
+    /* Home Page - Planes */
+    .section-planes {
+        padding: 60px 0;
+    }
+    
+    .planes-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .plan-card {
+        padding: 35px 25px;
+    }
+    
+    .plan-price h2 {
+        font-size: 42px;
+    }
+    
+    /* Home Page - Ubicacion */
+    .section-ubicacion {
+        padding: 60px 0;
+    }
+    
+    .ubicacion-row {
+        gap: 30px;
+    }
+    
+    .ubicacion-content h2 {
+        font-size: 28px;
+    }
+    
+    .mapa-container {
+        height: 300px;
+    }
+    
+    /* Legal Pages */
+    .page-section {
+        padding: 100px 0 60px;
+    }
+    
+    .page-title h1 {
+        font-size: 32px;
+    }
+    
+    .section-block {
+        padding: 25px 20px;
+    }
+    
+    .section-block h2 {
+        font-size: 20px;
+    }
+    
+    .category-title {
+        padding: 20px;
+    }
+    
+    .faq-accordion .accordion-button {
+        padding: 15px 20px;
+        font-size: 13px;
+    }
+    
+    .contact-cta {
+        padding: 30px 20px;
+    }
+    
+    .contact-cta h4 {
+        font-size: 18px;
+    }
+    
+    /* Utility */
+    .whatsapp-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+    }
 }

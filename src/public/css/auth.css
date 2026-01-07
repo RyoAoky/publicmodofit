@@ -1,9 +1,21 @@
 /* ================================
    ModoFit - Estilos de Autenticación
+   Solo estilos específicos de login/registro
+   Variables y estilos comunes están en styles.css
    ================================ */
 
+/* Variables CSS - ModoFit Brand */
+:root {
+    --primary-color: #e4d09b;
+    --primary-color-hover: color-mix(in srgb, var(--primary-color) 85%, black);
+    --primary-color-transparent: color-mix(in srgb, var(--primary-color) 10%, transparent);
+    --bg-dark: #111;
+    --bg-surface: #1a1a1a;
+    --bg-card: #0a0a0a;
+}
+
 .auth-body {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    background: linear-gradient(135deg, var(--bg-dark, #111) 0%, var(--bg-surface, #1a1a1a) 50%, var(--bg-card, #0a0a0a) 100%);
     min-height: 100vh;
 }
 
@@ -43,14 +55,35 @@
     border-radius: 10px;
 }
 
+/* Botón primario con colores ModoFit */
+.auth-container .btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-hover) 100%);
+    border: none;
+    color: #000;
+    font-weight: 600;
+}
+
+.auth-container .btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-color-hover) 0%, color-mix(in srgb, var(--primary-color) 75%, black) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px var(--primary-color-transparent);
+    color: #000;
+}
+
+.auth-container .btn-primary:focus {
+    background: linear-gradient(135deg, var(--primary-color-hover) 0%, color-mix(in srgb, var(--primary-color) 75%, black) 100%);
+    box-shadow: 0 0 0 0.25rem var(--primary-color-transparent);
+    color: #000;
+}
+
 .auth-container a {
-    color: #0d6efd;
+    color: var(--primary-color);
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
 .auth-container a:hover {
-    color: #0b5ed7;
+    color: var(--primary-color-hover);
 }
 
 /* Password toggle button */

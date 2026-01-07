@@ -85,6 +85,7 @@ app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
 app.use('/pedidos', require('./routes/pedidos'));
 app.use('/dashboard', require('./routes/dashboard'));
+app.use('/', require('./routes/legal'));
 
 // Archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));

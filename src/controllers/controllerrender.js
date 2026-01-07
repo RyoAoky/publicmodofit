@@ -101,11 +101,29 @@ module.exports = {
             const openpayConfig = pasarela[0] || {};
             const isSandbox = openpayConfig.ambiente === 'SANDBOX';
 
+            // Parse plan parameters from query string
+            const planData = {
+                planId: req.query.planId || null,
+                planName: req.query.planName || null,
+                price: req.query.price ? parseFloat(req.query.price) : null,
+                currency: req.query.currency || 'S/',
+                duration: req.query.duration ? parseInt(req.query.duration) : null,
+                frequency: req.query.frequency ? parseInt(req.query.frequency) : null,
+                frequencyUnit: req.query.frequencyUnit || null,
+                trialDays: req.query.trialDays ? parseInt(req.query.trialDays) : null,
+                description: req.query.description || null
+            };
+
+            // Only include plan data if we have essential information
+            const hasValidPlanData = planData.planId && planData.planName && planData.price;
+
             res.render('pedidos/checkout', { 
                 layout: 'public',
                 openpayMerchantId: openpayConfig.merchantid || '',
                 openpayPublicKey: openpayConfig.publickey || '',
-                openpayIsSandbox: isSandbox
+                openpayIsSandbox: isSandbox,
+                planData: hasValidPlanData ? planData : null,
+                hasPreselectedPlan: hasValidPlanData
             });
         } catch (error) {
             console.error('Error al obtener configuración de pasarela:', error);
@@ -113,12 +131,25 @@ module.exports = {
                 layout: 'public',
                 openpayMerchantId: '',
                 openpayPublicKey: '',
-                openpayIsSandbox: true
+                openpayIsSandbox: true,
+                planData: null,
+                hasPreselectedPlan: false
             });
         }
     },
     async getConfirmacion(req, res) {
         res.render('pedidos/confirmacion', { layout: 'public' });
+    },
+
+    // Render de páginas legales
+    async renderFAQ(req, res) {
+        res.render('legal/faq', { layout: 'public' });
+    },
+    async renderPrivacyPolicy(req, res) {
+        res.render('legal/privacy-policy', { layout: 'public' });
+    },
+    async renderTermsConditions(req, res) {
+        res.render('legal/terms-conditions', { layout: 'public' });
     },
 
     // Render de errores

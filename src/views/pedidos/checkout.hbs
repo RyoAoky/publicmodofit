@@ -1,7 +1,7 @@
 <style>
     .section-header {
         padding: 140px 0 60px;
-        background: var(--negro);
+        background: var(--bg-dark);
         text-align: center;
     }
 
@@ -13,7 +13,7 @@
 
     .section-checkout {
         padding: 40px 0 100px;
-        background: var(--negro);
+        background: var(--bg-dark);
     }
 
     .checkout-row {
@@ -33,21 +33,21 @@
     }
 
     .checkout-card {
-        background: var(--negro-card);
-        border: 1px solid var(--borde);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
         margin-bottom: 25px;
     }
 
     .checkout-card-header {
         padding: 20px 25px;
-        border-bottom: 1px solid var(--borde);
+        border-bottom: 1px solid var(--border-color);
         display: flex;
         align-items: center;
         gap: 12px;
     }
 
     .checkout-card-header i {
-        color: var(--beige);
+        color: var(--accent-color);
         font-size: 20px;
     }
 
@@ -73,8 +73,8 @@
     }
 
     .form-control, .form-select {
-        background: var(--gris-oscuro);
-        border: 1px solid var(--borde);
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
         color: #fff;
         border-radius: 0;
         padding: 14px 16px;
@@ -82,10 +82,10 @@
     }
 
     .form-control:focus, .form-select:focus {
-        background: var(--gris-oscuro);
-        border-color: var(--beige);
+        background: var(--bg-surface);
+        border-color: var(--accent-color);
         color: #fff;
-        box-shadow: 0 0 0 3px rgba(228, 208, 155, 0.15);
+        box-shadow: 0 0 0 3px var(--primary-color-transparent);
     }
 
     .form-control::placeholder {
@@ -98,16 +98,16 @@
     }
 
     .alert-login {
-        background: var(--gris-oscuro);
-        border: 1px solid var(--borde);
-        border-left: 3px solid var(--beige);
-        color: var(--gris-texto);
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-left: 3px solid var(--accent-color);
+        color: var(--text-muted);
         padding: 15px 20px;
         margin-bottom: 20px;
     }
 
     .alert-login a {
-        color: var(--beige);
+        color: var(--accent-color);
         font-weight: 600;
     }
 
@@ -128,8 +128,8 @@
     }
 
     .security-notice {
-        background: var(--gris-oscuro);
-        border: 1px solid var(--borde);
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
         padding: 15px 20px;
         margin-top: 20px;
         display: flex;
@@ -144,7 +144,7 @@
 
     .security-notice span {
         font-size: 13px;
-        color: var(--gris-texto);
+        color: var(--text-muted);
     }
 
     .summary-card {
@@ -154,14 +154,14 @@
 
     .summary-items {
         padding: 20px 25px;
-        border-bottom: 1px solid var(--borde);
+        border-bottom: 1px solid var(--border-color);
     }
 
     .summary-item {
         display: flex;
         justify-content: space-between;
         padding: 8px 0;
-        color: var(--gris-texto);
+        color: var(--text-muted);
         font-size: 14px;
     }
 
@@ -173,17 +173,17 @@
         display: flex;
         justify-content: space-between;
         padding: 10px 0;
-        color: var(--gris-texto);
+        color: var(--text-muted);
     }
 
     .summary-row.total {
-        border-top: 1px solid var(--borde);
+        border-top: 1px solid var(--border-color);
         margin-top: 10px;
         padding-top: 20px;
     }
 
     .summary-row.total span:last-child {
-        color: var(--beige);
+        color: var(--accent-color);
         font-size: 26px;
         font-family: "Poppins", sans-serif;
         font-weight: 700;
@@ -215,8 +215,8 @@
         display: block;
         width: 100%;
         background: transparent;
-        border: 1px solid var(--borde);
-        color: var(--gris-texto);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
         font-family: "Poppins", sans-serif;
         font-weight: 600;
         font-size: 12px;
@@ -230,8 +230,8 @@
     }
 
     .btn-back:hover {
-        border-color: var(--beige);
-        color: var(--beige);
+        border-color: var(--accent-color);
+        color: var(--accent-color);
     }
 
     .iconos-titulo {
@@ -239,7 +239,7 @@
     }
 
     .iconos-titulo i {
-        color: var(--beige);
+        color: var(--accent-color);
         font-size: 4px;
         margin: 0 5px;
     }
@@ -382,30 +382,60 @@
                         <div class="checkout-card-header">
                             <h5>Resumen del Pedido</h5>
                         </div>
+                        {{#if hasPreselectedPlan}}
+                        <div class="summary-items">
+                            <div class="summary-item">
+                                <span>{{planData.planName}}</span>
+                                <span>{{planData.currency}} {{planData.price}}</span>
+                            </div>
+                            {{#if planData.description}}
+                            <div style="padding: 10px 0; color: var(--text-muted); font-size: 12px;">
+                                {{planData.description}}
+                            </div>
+                            {{/if}}
+                            {{#if planData.duration}}
+                            <div style="padding: 5px 0; color: var(--text-muted); font-size: 12px;">
+                                <i class="bi bi-calendar-check me-1"></i> Duración: {{planData.duration}} días
+                            </div>
+                            {{/if}}
+                            {{#if planData.trialDays}}
+                            <div style="padding: 5px 0; color: var(--accent-color); font-size: 12px;">
+                                <i class="bi bi-gift me-1"></i> {{planData.trialDays}} días de prueba gratis
+                            </div>
+                            {{/if}}
+                        </div>
+                        {{else}}
                         <div class="summary-items" id="resumen-items">
                             <!-- Items loaded via JS -->
                         </div>
+                        {{/if}}
                         <div class="summary-totals">
                             <div class="summary-row">
                                 <span>Subtotal</span>
-                                <span id="subtotal">S/ 0.00</span>
+                                <span id="subtotal">{{#if hasPreselectedPlan}}{{planData.currency}} {{formatPrecioSinIGV planData.price}}{{else}}S/ 0.00{{/if}}</span>
                             </div>
                             <div class="summary-row">
                                 <span>IGV (18%)</span>
-                                <span id="igv">S/ 0.00</span>
+                                <span id="igv">{{#if hasPreselectedPlan}}{{planData.currency}} {{formatIGV planData.price}}{{else}}S/ 0.00{{/if}}</span>
                             </div>
                             <div class="summary-row total">
                                 <span style="color: #fff; font-weight: 600;">Total a Pagar</span>
-                                <span id="total">S/ 0.00</span>
+                                <span id="total">{{#if hasPreselectedPlan}}{{planData.currency}} {{planData.price}}{{else}}S/ 0.00{{/if}}</span>
                             </div>
                         </div>
                         <div style="padding: 0 25px 25px;">
                             <button class="btn-pay" id="btn-pagar" onclick="procesarPago()">
                                 <i class="bi bi-check-circle me-2"></i>Confirmar Pedido
                             </button>
+                            {{#if hasPreselectedPlan}}
+                            <a href="/#planes" class="btn-back">
+                                <i class="bi bi-arrow-left me-2"></i>Volver a Planes
+                            </a>
+                            {{else}}
                             <a href="/pedidos/carrito" class="btn-back">
                                 <i class="bi bi-arrow-left me-2"></i>Volver al Carrito
                             </a>
+                            {{/if}}
                         </div>
                     </div>
                 </div>
@@ -419,6 +449,14 @@
 <input type="hidden" id="openpay-public-key" value="{{openpayPublicKey}}">
 <input type="hidden" id="openpay-sandbox" value="{{openpayIsSandbox}}">
 
+<!-- Plan Data -->
+{{#if hasPreselectedPlan}}
+<input type="hidden" id="plan-data" value="{{json planData}}">
+<input type="hidden" id="has-preselected-plan" value="true">
+{{else}}
+<input type="hidden" id="has-preselected-plan" value="false">
+{{/if}}
+
 <!-- Scripts -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script src="https://js.openpay.pe/openpay.v1.min.js"></script>
@@ -428,8 +466,31 @@
 const openpayMerchantId = document.getElementById('openpay-merchant-id').value;
 const openpayPublicKey = document.getElementById('openpay-public-key').value;
 const openpayIsSandbox = document.getElementById('openpay-sandbox').value === 'true';
+const hasPreselectedPlan = document.getElementById('has-preselected-plan').value === 'true';
 let openpayDeviceSessionId = '';
-let carrito = JSON.parse(localStorage.getItem('modofit_carrito')) || [];
+let carrito = [];
+let planData = null;
+
+// Initialize cart and plan data
+if (hasPreselectedPlan) {
+    try {
+        planData = JSON.parse(document.getElementById('plan-data').value);
+        // Create cart item from plan data
+        carrito = [{
+            id: planData.planId,
+            nombre: planData.planName,
+            precio: planData.price,
+            cantidad: 1,
+            moneda: planData.currency,
+            descripcion: planData.description
+        }];
+    } catch (error) {
+        console.error('Error parsing plan data:', error);
+        carrito = JSON.parse(localStorage.getItem('modofit_carrito')) || [];
+    }
+} else {
+    carrito = JSON.parse(localStorage.getItem('modofit_carrito')) || [];
+}
 
 const DOC_CONFIG = {
     'DNI': { min: 8, max: 8, pattern: /^\d{8}$/, help: 'DNI debe tener exactamente 8 dígitos' },
@@ -502,6 +563,11 @@ document.getElementById('cvv').addEventListener('input', function(e) {
 });
 
 function renderResumen() {
+    // Skip rendering if we have a preselected plan (already rendered server-side)
+    if (hasPreselectedPlan) {
+        return;
+    }
+    
     const container = document.getElementById('resumen-items');
     if (!container) return;
     

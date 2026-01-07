@@ -6,10 +6,11 @@
     overflow-x: hidden;
 }
 
+/* Sidebar - visible por defecto en desktop */
 #sidebar-wrapper {
     min-height: 100vh;
     width: 250px;
-    margin-left: -250px;
+    margin-left: 0;
     transition: margin 0.25s ease-out;
     position: fixed;
     left: 0;
@@ -34,37 +35,45 @@
 }
 
 #sidebar-wrapper .list-group-item.active {
-    background-color: #0d6efd !important;
+    background-color: var(--primary-color) !important;
+    color: var(--dark-color) !important;
 }
 
 #sidebar-wrapper .list-group-item i {
     width: 20px;
 }
 
+/* Content area - con margen para el sidebar */
 #page-content-wrapper {
     width: 100%;
     min-height: 100vh;
     transition: margin 0.25s ease-out;
     margin-left: 250px;
+    background-color: var(--light-color);
 }
 
-/* Toggled state */
+/* Toggled state - oculta el sidebar */
 #wrapper.toggled #sidebar-wrapper {
-    margin-left: 0;
+    margin-left: -250px;
 }
 
 #wrapper.toggled #page-content-wrapper {
     margin-left: 0;
 }
 
-/* Default state: sidebar visible */
-#wrapper #sidebar-wrapper {
-    margin-left: 0;
-}
-
-/* Menu toggle button */
+/* Menu toggle button - usa colores de marca */
 #menu-toggle {
     border-radius: 8px;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--dark-color);
+    transition: all 0.3s ease;
+}
+
+#menu-toggle:hover {
+    background-color: var(--primary-color-hover);
+    border-color: var(--primary-color-hover);
+    transform: scale(1.05);
 }
 
 /* Stats cards */
@@ -76,7 +85,38 @@
     opacity: 0.75;
 }
 
-/* Responsive */
+/* Dashboard cards con sombra mejorada */
+#page-content-wrapper .card {
+    border-radius: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#page-content-wrapper .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Card headers */
+.card-header {
+    border-radius: 12px 12px 0 0 !important;
+}
+
+/* Links en dashboard */
+#page-content-wrapper a:not(.btn) {
+    color: var(--primary-color);
+    transition: color 0.3s ease;
+}
+
+#page-content-wrapper a:not(.btn):hover {
+    color: var(--primary-color-hover);
+}
+
+/* Spinner con color primario */
+.spinner-border.text-primary {
+    color: var(--primary-color) !important;
+}
+
+/* Responsive - en móvil el sidebar está oculto por defecto */
 @media (max-width: 768px) {
     #sidebar-wrapper {
         margin-left: -250px;
@@ -86,18 +126,42 @@
         margin-left: 0;
     }
     
+    /* En móvil, toggled MUESTRA el sidebar */
     #wrapper.toggled #sidebar-wrapper {
         margin-left: 0;
     }
     
     #wrapper.toggled #page-content-wrapper {
-        margin-left: 250px;
+        margin-left: 0;
+    }
+    
+    /* Overlay cuando sidebar está abierto en móvil */
+    #wrapper.toggled::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 250px;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 99;
     }
 }
 
 /* Tables in dashboard */
 .table-hover tbody tr:hover {
-    background-color: rgba(13, 110, 253, 0.05);
+    background-color: var(--primary-color-transparent);
+}
+
+/* Table headers */
+.table thead th {
+    background-color: var(--light-color);
+    border-bottom: 2px solid var(--primary-color-transparent);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    color: var(--secondary-color);
 }
 
 /* Quick action buttons */
@@ -111,7 +175,7 @@
 
 /* Profile card */
 .card.border-danger {
-    border: 1px solid #dc3545 !important;
+    border: 1px solid var(--danger-color) !important;
 }
 
 /* Sticky sidebar on scroll */
@@ -122,4 +186,33 @@
 /* User dropdown */
 .nav-item.dropdown .dropdown-menu {
     min-width: 200px;
+    border: none;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+}
+
+/* Navbar del dashboard */
+#page-content-wrapper .navbar {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Badges con color primario */
+.badge.bg-primary {
+    background-color: var(--primary-color) !important;
+    color: var(--dark-color);
+}
+
+/* List group items en dashboard */
+.list-group-item {
+    border-color: rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.list-group-item:hover {
+    background-color: var(--primary-color-transparent);
+}
+
+/* Icons con color primario */
+.text-primary {
+    color: var(--primary-color) !important;
 }

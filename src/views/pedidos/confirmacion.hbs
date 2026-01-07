@@ -1,13 +1,13 @@
 <style>
     .section-confirmation {
         padding: 140px 0 100px;
-        background: var(--negro);
+        background: var(--bg-dark);
         min-height: 100vh;
     }
 
     .confirmation-card {
-        background: var(--negro-card);
-        border: 1px solid var(--borde);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
         max-width: 600px;
         margin: 0 auto;
         text-align: center;
@@ -49,14 +49,14 @@
     }
 
     .confirmation-card .lead {
-        color: var(--gris-texto);
+        color: var(--text-muted);
         font-size: 16px;
         margin-bottom: 35px;
     }
 
     .order-details {
-        background: var(--gris-oscuro);
-        border: 1px solid var(--borde);
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
         padding: 30px;
         margin-bottom: 30px;
         text-align: left;
@@ -75,7 +75,7 @@
         display: flex;
         justify-content: space-between;
         padding: 12px 0;
-        border-bottom: 1px solid var(--borde);
+        border-bottom: 1px solid var(--border-color);
     }
 
     .detail-row:last-child {
@@ -83,7 +83,7 @@
     }
 
     .detail-row span {
-        color: var(--gris-texto);
+        color: var(--text-muted);
     }
 
     .detail-row strong {
@@ -91,18 +91,18 @@
     }
 
     .detail-row.total strong {
-        color: var(--beige);
+        color: var(--accent-color);
         font-size: 20px;
     }
 
     .email-notice {
-        color: var(--gris-texto);
+        color: var(--text-muted);
         font-size: 14px;
         margin-bottom: 30px;
     }
 
     .email-notice i {
-        color: var(--beige);
+        color: var(--accent-color);
     }
 
     .btn-group-confirmation {
@@ -113,9 +113,9 @@
     }
 
     .btn-home {
-        background: var(--beige);
-        border: 1px solid var(--beige);
-        color: #000;
+        background: var(--accent-color);
+        border: 1px solid var(--accent-color);
+        color: var(--bg-dark);
         font-family: "Poppins", sans-serif;
         font-weight: 700;
         font-size: 12px;
@@ -128,13 +128,13 @@
 
     .btn-home:hover {
         background: transparent;
-        color: var(--beige);
+        color: var(--accent-color);
     }
 
     .btn-dashboard {
         background: transparent;
-        border: 1px solid var(--borde);
-        color: var(--gris-texto);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
         font-family: "Poppins", sans-serif;
         font-weight: 600;
         font-size: 12px;
@@ -146,12 +146,12 @@
     }
 
     .btn-dashboard:hover {
-        border-color: var(--beige);
-        color: var(--beige);
+        border-color: var(--accent-color);
+        color: var(--accent-color);
     }
 
     .spinner-border {
-        color: var(--beige);
+        color: var(--accent-color);
     }
 </style>
 
@@ -196,7 +196,7 @@ async function cargarConfirmacion() {
     const accionesContainer = document.getElementById('acciones-container');
     
     if (!idPedido) {
-        container.innerHTML = '<p style="color: var(--gris-texto); text-align: center;">Información del pedido no disponible</p>';
+        container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Información del pedido no disponible</p>';
         return;
     }
     
@@ -242,11 +242,11 @@ async function cargarConfirmacion() {
                 `;
             }
         } else {
-            container.innerHTML = '<p style="color: var(--gris-texto); text-align: center;">Pedido procesado correctamente</p>';
+            container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Pedido procesado correctamente</p>';
         }
     } catch (error) {
         console.error('Error:', error);
-        container.innerHTML = '<p style="color: var(--gris-texto); text-align: center;">Pedido procesado correctamente</p>';
+        container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Pedido procesado correctamente</p>';
     }
 }
 

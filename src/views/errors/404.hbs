@@ -1,10 +1,87 @@
-<div class="min-vh-100 d-flex align-items-center justify-content-center">
-    <div class="text-center">
-        <h1 class="display-1 fw-bold text-primary">404</h1>
-        <h2 class="fw-bold mb-3">Página no encontrada</h2>
-        <p class="text-muted mb-4">Lo sentimos, la página que buscas no existe o ha sido movida.</p>
-        <a href="/" class="btn btn-primary btn-lg">
-            <i class="bi bi-house me-2"></i>Volver al Inicio
-        </a>
+<style>
+    .error-section {
+        min-height: 100vh;
+        background: var(--bg-dark);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 120px 0;
+    }
+
+    .error-content {
+        text-align: center;
+    }
+
+    .error-code {
+        font-family: "Poppins", sans-serif;
+        font-size: 150px;
+        font-weight: 700;
+        color: var(--accent-color);
+        line-height: 1;
+        margin-bottom: 20px;
+    }
+
+    .error-title {
+        color: #fff;
+        font-size: 32px;
+        margin-bottom: 15px;
+    }
+
+    .error-message {
+        color: var(--text-muted);
+        font-size: 16px;
+        margin-bottom: 30px;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .btn-home {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--accent-color);
+        border: 1px solid var(--accent-color);
+        color: var(--bg-dark);
+        padding: 14px 28px;
+        font-family: "Poppins", sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .btn-home:hover {
+        background: transparent;
+        color: var(--accent-color);
+    }
+
+    .iconos-titulo {
+        margin: 20px 0;
+    }
+
+    .iconos-titulo i {
+        color: var(--accent-color);
+        font-size: 5px;
+        margin: 0 6px;
+    }
+</style>
+
+<section class="error-section">
+    <div class="container">
+        <div class="error-content">
+            <h1 class="error-code">404</h1>
+            <div class="iconos-titulo">
+                <i class="bi bi-circle-fill"></i>
+                <i class="bi bi-circle-fill"></i>
+                <i class="bi bi-circle-fill"></i>
+            </div>
+            <h2 class="error-title">Página no encontrada</h2>
+            <p class="error-message">Lo sentimos, la página que buscas no existe o ha sido movida.</p>
+            <a href="/" class="btn-home">
+                <i class="bi bi-house"></i> Volver al Inicio
+            </a>
+        </div>
     </div>
-</div>
+</section>

@@ -1,7 +1,7 @@
 <style>
     .section-header {
         padding: 140px 0 60px;
-        background: var(--negro);
+        background: var(--bg-dark);
         text-align: center;
     }
 
@@ -19,7 +19,7 @@
 
     .section-contact {
         padding: 60px 0 100px;
-        background: var(--negro);
+        background: var(--bg-dark);
     }
 
     .contact-row {
@@ -47,8 +47,8 @@
     }
 
     .contact-form .form-control {
-        background: var(--gris-oscuro);
-        border: 1px solid var(--borde);
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
         color: #fff;
         border-radius: 0;
         padding: 16px;
@@ -57,9 +57,9 @@
     }
 
     .contact-form .form-control:focus {
-        background: var(--gris-oscuro);
-        border-color: var(--beige);
-        box-shadow: 0 0 0 3px rgba(228, 208, 155, 0.15);
+        background: var(--bg-surface);
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px var(--primary-color-transparent);
         color: #fff;
     }
 
@@ -68,8 +68,8 @@
     }
 
     .contact-form .form-select {
-        background: var(--gris-oscuro);
-        border: 1px solid var(--borde);
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
         color: #fff;
         border-radius: 0;
         padding: 16px;
@@ -78,9 +78,9 @@
     }
 
     .contact-form .form-select:focus {
-        background: var(--gris-oscuro);
-        border-color: var(--beige);
-        box-shadow: 0 0 0 3px rgba(228, 208, 155, 0.15);
+        background: var(--bg-surface);
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px var(--primary-color-transparent);
     }
 
     .contact-form textarea {
@@ -89,9 +89,9 @@
     }
 
     .btn-submit {
-        background: var(--beige);
-        border: 1px solid var(--beige);
-        color: #000;
+        background: var(--accent-color);
+        border: 1px solid var(--accent-color);
+        color: var(--bg-dark);
         font-family: "Poppins", sans-serif;
         font-weight: 800;
         font-size: 12px;
@@ -105,12 +105,12 @@
 
     .btn-submit:hover {
         background: transparent;
-        color: var(--beige);
+        color: var(--accent-color);
     }
 
     .info-card {
-        background: var(--negro-card);
-        border: 1px solid var(--borde);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
         padding: 35px;
         margin-bottom: 25px;
     }
@@ -132,9 +132,9 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: var(--gris-oscuro);
-        border: 1px solid var(--borde);
-        color: var(--beige);
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        color: var(--accent-color);
         font-size: 20px;
         flex-shrink: 0;
     }
@@ -153,8 +153,8 @@
     }
 
     .horarios-card {
-        background: var(--negro-card);
-        border: 1px solid var(--borde);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
         padding: 35px;
     }
 
@@ -170,7 +170,7 @@
         display: flex;
         justify-content: space-between;
         padding: 12px 0;
-        border-bottom: 1px solid var(--borde);
+        border-bottom: 1px solid var(--border-color);
     }
 
     .horario-item:last-child {
@@ -178,7 +178,7 @@
     }
 
     .horario-item span {
-        color: var(--gris-texto);
+        color: var(--text-muted);
     }
 
     .horario-item strong {
@@ -190,7 +190,7 @@
     }
 
     .iconos-titulo i {
-        color: var(--beige);
+        color: var(--accent-color);
         font-size: 4px;
         margin: 0 5px;
     }
@@ -278,7 +278,7 @@
                 </div>
 
                 <div class="horarios-card">
-                    <h4><i class="bi bi-clock me-2" style="color: var(--beige);"></i>Horarios de atención</h4>
+                    <h4><i class="bi bi-clock me-2" style="color: var(--accent-color);"></i>Horarios de atención</h4>
                     <div class="horario-item">
                         <span>Lunes - Viernes</span>
                         <strong>5:00 AM - 11:00 PM</strong>

@@ -58,5 +58,20 @@ module.exports = {
     // JSON stringify para pasar datos a JavaScript
     json: function(context) {
         return JSON.stringify(context);
+    },
+
+    // Formatear precio sin IGV (precio base)
+    formatPrecioSinIGV: function(precio) {
+        if (!precio) return '0.00';
+        const precioSinIGV = parseFloat(precio) / 1.18;
+        return precioSinIGV.toFixed(2);
+    },
+
+    // Calcular IGV del precio
+    formatIGV: function(precio) {
+        if (!precio) return '0.00';
+        const precioSinIGV = parseFloat(precio) / 1.18;
+        const igv = parseFloat(precio) - precioSinIGV;
+        return igv.toFixed(2);
     }
 };

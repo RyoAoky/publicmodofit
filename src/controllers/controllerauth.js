@@ -35,12 +35,52 @@ module.exports = {
 
     // Cerrar sesión
     getLogout(req, res) {
-        req.logout((err) => {
-            if (err) {
-                console.error('Error al cerrar sesión:', err);
+        // Timeout de seguridad para evitar que se quede colgado
+        const redirectTimeout = setTimeout(() => {
+            console.warn('Logout timeout - redirigiendo de todas formas');
+            res.clearCookie('connect.sid');
+            if (!res.headersSent) {
+                res.redirect('/');
             }
-            res.redirect('/');
-        });
+        }, 3000); // 3 segundos máximo
+
+        try {
+            // Primero hacer logout de passport
+            req.logout((err) => {
+                if (err) {
+                    console.error('Error en req.logout:', err);
+                }
+                
+                // Destruir la sesión completamente
+                if (req.session) {
+                    req.session.destroy((sessionErr) => {
+                        clearTimeout(redirectTimeout);
+                        if (sessionErr) {
+                            console.error('Error al destruir sesión:', sessionErr);
+                        }
+                        
+                        // Limpiar la cookie de sesión
+                        res.clearCookie('connect.sid');
+                        if (!res.headersSent) {
+                            res.redirect('/');
+                        }
+                    });
+                } else {
+                    clearTimeout(redirectTimeout);
+                    res.clearCookie('connect.sid');
+                    if (!res.headersSent) {
+                        res.redirect('/');
+                    }
+                }
+            });
+        } catch (error) {
+            clearTimeout(redirectTimeout);
+            console.error('Error en logout:', error);
+            res.clearCookie('connect.sid');
+            if (!res.headersSent) {
+                res.redirect('/');
+            }
+        }
     },
 
     // Procesar recuperación de contraseña

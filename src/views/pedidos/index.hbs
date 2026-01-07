@@ -1,7 +1,7 @@
 <style>
     .section-header {
         padding: 140px 0 60px;
-        background: var(--negro);
+        background: var(--bg-dark);
         text-align: center;
     }
 
@@ -19,21 +19,21 @@
 
     .section-shop {
         padding: 40px 0 100px;
-        background: var(--negro);
+        background: var(--bg-dark);
     }
 
-    /* Tabs INPROV Style */
-    .nav-pills-inprov {
+    /* Tabs ModoFit Style */
+    .nav-pills-tabs {
         display: flex;
         justify-content: center;
         gap: 15px;
         margin-bottom: 50px;
     }
 
-    .nav-pills-inprov .nav-link {
-        background: var(--negro-card);
-        border: 1px solid var(--borde);
-        color: var(--gris-texto);
+    .nav-pills-tabs .nav-link {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
         font-family: "Poppins", sans-serif;
         font-size: 12px;
         font-weight: 700;
@@ -44,15 +44,15 @@
         transition: all 0.3s;
     }
 
-    .nav-pills-inprov .nav-link:hover {
-        border-color: var(--beige);
-        color: var(--beige);
+    .nav-pills-tabs .nav-link:hover {
+        border-color: var(--accent-color);
+        color: var(--accent-color);
     }
 
-    .nav-pills-inprov .nav-link.active {
-        background: var(--beige);
-        border-color: var(--beige);
-        color: #000;
+    .nav-pills-tabs .nav-link.active {
+        background: var(--accent-color);
+        border-color: var(--accent-color);
+        color: var(--bg-dark);
     }
 
     .iconos-titulo {
@@ -60,7 +60,7 @@
     }
 
     .iconos-titulo i {
-        color: var(--beige);
+        color: var(--accent-color);
         font-size: 4px;
         margin: 0 5px;
     }
@@ -73,14 +73,14 @@
     }
 
     .product-card {
-        background: var(--negro-card);
-        border: 1px solid var(--borde);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
         transition: all 0.3s;
         overflow: hidden;
     }
 
     .product-card:hover {
-        border-color: var(--beige);
+        border-color: var(--accent-color);
         transform: translateY(-5px);
     }
 
@@ -107,7 +107,7 @@
     }
 
     .product-price {
-        color: var(--beige);
+        color: var(--accent-color);
         font-family: "Poppins", sans-serif;
         font-size: 22px;
         font-weight: 700;
@@ -118,8 +118,8 @@
         display: block;
         width: 100%;
         background: transparent;
-        border: 1px solid var(--beige);
-        color: var(--beige);
+        border: 1px solid var(--accent-color);
+        color: var(--accent-color);
         font-family: "Poppins", sans-serif;
         font-size: 11px;
         font-weight: 700;
@@ -131,8 +131,8 @@
     }
 
     .btn-add-cart:hover {
-        background: var(--beige);
-        color: #000;
+        background: var(--accent-color);
+        color: var(--bg-dark);
     }
 
     /* Plans Grid */
@@ -143,8 +143,8 @@
     }
 
     .plan-card {
-        background: var(--negro-card);
-        border: 1px solid var(--borde);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
         padding: 40px 30px;
         transition: all 0.4s;
         position: relative;
@@ -157,14 +157,14 @@
         left: 0;
         width: 100%;
         height: 4px;
-        background: var(--beige);
+        background: var(--accent-color);
         transform: scaleX(0);
         transition: transform 0.4s;
         transform-origin: left;
     }
 
     .plan-card:hover {
-        border-color: var(--beige);
+        border-color: var(--accent-color);
         transform: translateY(-8px);
     }
 
@@ -173,7 +173,7 @@
     }
 
     .plan-card.popular {
-        border-color: var(--beige);
+        border-color: var(--accent-color);
     }
 
     .plan-card.popular::before {
@@ -184,8 +184,8 @@
         position: absolute;
         top: 20px;
         right: 20px;
-        background: var(--beige);
-        color: #000;
+        background: var(--accent-color);
+        color: var(--bg-dark);
         font-size: 10px;
         font-weight: 700;
         text-transform: uppercase;
@@ -202,12 +202,12 @@
 
     .plan-badge {
         display: inline-block;
-        background: var(--gris-oscuro);
-        border: 1px solid var(--borde);
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
         padding: 5px 12px;
         font-size: 10px;
         text-transform: uppercase;
-        color: var(--gris-texto);
+        color: var(--text-muted);
         letter-spacing: 1px;
         margin-bottom: 20px;
     }
@@ -218,7 +218,7 @@
 
     .plan-price h2 {
         font-size: 48px;
-        color: var(--beige);
+        color: var(--accent-color);
         line-height: 1;
     }
 
@@ -229,7 +229,7 @@
 
     .plan-price p {
         font-size: 12px;
-        color: var(--gris-texto);
+        color: var(--text-muted);
         margin-top: 5px;
     }
 
@@ -241,7 +241,7 @@
 
     .plan-features li {
         padding: 10px 0;
-        color: var(--gris-texto);
+        color: var(--text-muted);
         font-size: 13px;
         display: flex;
         align-items: center;
@@ -254,7 +254,7 @@
     }
 
     .plan-features li i {
-        color: var(--beige);
+        color: var(--accent-color);
     }
 
     .plan-features li.destacado {
@@ -266,22 +266,22 @@
         display: block;
         width: 100%;
         text-align: center;
-        background: var(--beige);
-        color: #000;
+        background: var(--accent-color);
+        color: var(--bg-dark);
         padding: 16px;
         font-family: "Poppins", sans-serif;
         font-weight: 800;
         font-size: 12px;
         text-transform: uppercase;
         letter-spacing: 1px;
-        border: 1px solid var(--beige);
+        border: 1px solid var(--accent-color);
         transition: all 0.3s;
         cursor: pointer;
     }
 
     .btn-plan:hover {
         background: transparent;
-        color: var(--beige);
+        color: var(--accent-color);
     }
 
     /* Floating Cart */
@@ -296,8 +296,8 @@
         display: flex;
         align-items: center;
         gap: 12px;
-        background: var(--beige);
-        color: #000;
+        background: var(--accent-color);
+        color: var(--bg-dark);
         padding: 16px 24px;
         font-family: "Poppins", sans-serif;
         font-size: 13px;
@@ -314,13 +314,13 @@
 
     .cart-badge {
         background: #000;
-        color: var(--beige);
+        color: var(--accent-color);
         padding: 4px 10px;
         font-size: 12px;
     }
 
     .spinner-border {
-        color: var(--beige);
+        color: var(--accent-color);
     }
 </style>
 
@@ -341,7 +341,7 @@
 <section class="section-shop">
     <div class="container">
         <!-- Tabs -->
-        <ul class="nav-pills-inprov" id="shopTabs" role="tablist">
+        <ul class="nav-pills-tabs" id="shopTabs" role="tablist">
             <li role="presentation">
                 <button class="nav-link active" id="membresias-tab" data-bs-toggle="pill" data-bs-target="#membresias" type="button">
                     <i class="bi bi-card-checklist me-2"></i>Membresías
@@ -437,13 +437,13 @@ async function cargarMembresias() {
         } else {
             container.innerHTML = `
                 <div style="text-align: center; padding: 60px; grid-column: 1/-1;">
-                    <i class="bi bi-card-list" style="font-size: 48px; color: var(--gris-texto);"></i>
-                    <p style="margin-top: 20px; color: var(--gris-texto);">No hay planes disponibles</p>
+                    <i class="bi bi-card-list" style="font-size: 48px; color: var(--text-muted);"></i>
+                    <p style="margin-top: 20px; color: var(--text-muted);">No hay planes disponibles</p>
                 </div>
             `;
         }
     } catch (error) {
-        container.innerHTML = '<div style="text-align: center; padding: 60px; grid-column: 1/-1;"><p style="color: var(--gris-texto);">Error al cargar planes</p></div>';
+        container.innerHTML = '<div style="text-align: center; padding: 60px; grid-column: 1/-1;"><p style="color: var(--text-muted);">Error al cargar planes</p></div>';
     }
 }
 
@@ -469,13 +469,13 @@ async function cargarProductos() {
         } else {
             container.innerHTML = `
                 <div style="text-align: center; padding: 60px; grid-column: 1/-1;">
-                    <i class="bi bi-box-seam" style="font-size: 48px; color: var(--gris-texto);"></i>
-                    <p style="margin-top: 20px; color: var(--gris-texto);">No hay productos disponibles</p>
+                    <i class="bi bi-box-seam" style="font-size: 48px; color: var(--text-muted);"></i>
+                    <p style="margin-top: 20px; color: var(--text-muted);">No hay productos disponibles</p>
                 </div>
             `;
         }
     } catch (error) {
-        container.innerHTML = '<div style="text-align: center; padding: 60px; grid-column: 1/-1;"><p style="color: var(--gris-texto);">Error al cargar productos</p></div>';
+        container.innerHTML = '<div style="text-align: center; padding: 60px; grid-column: 1/-1;"><p style="color: var(--text-muted);">Error al cargar productos</p></div>';
     }
 }
 

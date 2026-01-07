@@ -59,10 +59,13 @@ passport.deserializeUser(async (sessionData, done) => {
         if (result.length > 0 && result[0].idusu === sessionData.idusu) {
             done(null, result[0]);
         } else {
-            // Token inválido o idusu no coincide - sesión comprometida
-            done(new Error('Sesión inválida'), null);
+            // Token inválido o idusu no coincide - pasar null sin error para permitir logout
+            // Esto permite que el usuario pueda cerrar sesión aunque el token sea inválido
+            done(null, false);
         }
     } catch (error) {
-        done(error);
+        // En caso de error de BD, pasar null sin error para no bloquear el logout
+        console.error('Error en deserializeUser:', error);
+        done(null, false);
     }
 });
